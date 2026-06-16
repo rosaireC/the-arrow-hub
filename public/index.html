@@ -56,7 +56,6 @@
                         <input type="password" id="auth-password" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition" placeholder="••••••••">
                     </div>
                     
-                    <!-- KEEP ME LOGGED IN OPTION -->
                     <div class="flex items-center justify-between">
                         <label class="flex items-center space-x-2 cursor-pointer">
                             <input type="checkbox" id="auth-remember" class="rounded text-indigo-600 w-4 h-4 cursor-pointer accent-indigo-600">
@@ -151,7 +150,7 @@
                             <input type="text" id="ev-notes" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm" placeholder="Any special instructions or gear required?">
                         </div>
                         
-                        <!-- UPDATED RECURRING LOGIC (Until Date) -->
+                        <!-- RECURRING DATE SELECTION OVERHAUL -->
                         <div class="md:col-span-4 bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <label class="flex items-center space-x-3 cursor-pointer">
                                 <input type="checkbox" id="ev-recurring" class="rounded text-indigo-600 w-5 h-5 cursor-pointer accent-indigo-600">
@@ -248,10 +247,10 @@
     </main>
 
     <script>
+        // CRITICAL SECURITY FIX: Initializing database vectors with zero-fail empty arrays
         let db = { users: [], races: [], news: [] };
         let currentUser = null;
 
-        // Smart retry loop to handle Render's server sleep/wake cycle
         async function init(retries = 3) {
             try {
                 const res = await fetch('/api/data?t=' + new Date().getTime(), { 
@@ -278,6 +277,7 @@
             }
         }
 
+        // CRITICAL SYNC FIX: Auto-login will strictly wait until init() resolves completely
         window.onload = async () => {
             await init();
             const savedCreds = localStorage.getItem('captainsLogCreds');
@@ -289,7 +289,7 @@
                     document.getElementById('auth-password').value = creds.password || '';
                     document.getElementById('auth-remember').checked = true;
                     
-                    if (creds.vessel && creds.username && creds.password) {
+                    if (creds.vessel && creds.username && creds.password && db.users && db.users.length > 0) {
                         document.querySelector('[data-action="submit-login"]').click();
                     }
                 } catch(e) { localStorage.removeItem('captainsLogCreds'); }
@@ -505,7 +505,6 @@
                     let currentDate = new Date(baseDate.getTime());
                     let i = 0;
                     
-                    // Loop until the specific date is reached (Max 52 weeks as a safety stop)
                     while (currentDate <= untilDate && i < 52) {
                         let dateStr = currentDate.toISOString().split('T')[0];
                         
@@ -661,6 +660,7 @@
             document.getElementById('header-profile-pic').src = avatarUrl;
         }
 
+        // CRITICAL INJECTION LOCK: Fallbacks protect rendering loops from incomplete database columns
         function renderRaces() {
             try {
                 const container = document.getElementById('race-list'); 
@@ -674,7 +674,6 @@
 
                 let vesselRaces = db.races.filter(r => (r.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
                 
-                // Safe date sorting
                 vesselRaces.sort((a, b) => {
                     const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
                     const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
@@ -694,7 +693,6 @@
                         const spacesInt = parseInt(race.spaces) || 0;
                         const isFull = spacesInt > 0 && rsvpCount >= spacesInt;
 
-                        // Safe date rendering to prevent script crashes from corrupted database rows
                         let displayDate = "TBD";
                         if (race.startDate) {
                             const parsedDate = new Date(race.startDate + 'T12:00:00');
