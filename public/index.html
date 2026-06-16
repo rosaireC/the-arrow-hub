@@ -3,906 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Arrow - Crew Racing Hub</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Captain's Log</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-        }
-        .heading-font {
-            font-family: 'Outfit', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .heading-font { font-family: 'Outfit', sans-serif; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between text-slate-800">
+<body class="min-h-screen flex flex-col text-slate-800">
 
-    <div id="splash-screen" class="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center z-50 transition-opacity duration-700 ease-in-out">
+    <div id="splash-screen" class="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center z-50 transition-opacity duration-700">
         <div class="text-center animate-fade-in px-4">
-            <svg class="w-40 h-40 mx-auto mb-6 text-sky-400" viewBox="0 0 100 100" fill="currentColor">
-                <path d="M 15 65 C 35 68, 70 65, 85 55 C 70 58, 30 58, 20 52 Z" />
-                <path d="M 45 61 L 48 78 L 54 78 L 52 61 Z" /> 
-                <path d="M 22 55 L 21 64 L 23 64 Z" /> 
-                <line x1="50" y1="12" x2="50" y2="58" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                <path d="M 49 14 C 40 28, 28 42, 22 50 C 35 50, 45 52, 49 55 Z" opacity="0.85" />
-                <path d="M 51 18 C 58 30, 68 44, 78 52 C 68 50, 58 48, 51 46 Z" opacity="0.7" />
-            </svg>
-            <h1 class="heading-font text-4xl md:text-5xl font-bold text-white tracking-wider mb-2">THE ARROW</h1>
-            <p class="text-sky-300 text-lg font-light tracking-widest mb-8 uppercase">Welcome to the Crew</p>
-            <button data-action="dismiss-splash" class="bg-sky-500 hover:bg-sky-400 text-white font-medium py-3 px-8 rounded-full shadow-lg shadow-sky-500/20 transition-all transform hover:scale-105 cursor-pointer">
-                Enter Deck
-            </button>
+            <svg class="w-32 h-32 mx-auto mb-6 text-indigo-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8m0 0V3m0 10h.01M5.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-18 0V12a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 12v4.5m-18 0v-2.25A2.25 2.25 0 015.25 9.75h13.5A2.25 2.25 0 0121 12v2.25m-18 0v-4.5"></path></svg>
+            <h1 class="heading-font text-5xl font-extrabold text-white tracking-wider mb-2 uppercase">Captain's Log</h1>
+            <p class="text-indigo-300 text-sm font-medium tracking-widest mb-8 uppercase">Tactical Fleet Management</p>
+            <button data-action="dismiss-splash" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-10 rounded-full shadow-lg transition-transform transform hover:scale-105 cursor-pointer">BOARD VESSEL</button>
         </div>
     </div>
 
-    <main class="flex-grow flex items-center justify-center p-4 md:p-8 mt-4 w-full max-w-5xl mx-auto">
+    <div id="auth-screen" class="hidden flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+            <div class="p-8 text-center bg-slate-50 border-b border-slate-100">
+                <h2 class="heading-font text-2xl font-bold text-slate-900">Vessel Access</h2>
+                <p class="text-xs text-slate-500 mt-1">Enter your assigned vessel and credentials</p>
+            </div>
+            <div class="p-8 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Vessel Name</label>
+                    <input type="text" id="auth-vessel" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g., Black Magic">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Crew Username</label>
+                    <input type="text" id="auth-username" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="Username">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Password</label>
+                    <input type="password" id="auth-password" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="••••••••">
+                </div>
+                <div id="auth-error" class="text-rose-500 text-sm hidden font-medium text-center"></div>
+                
+                <div class="flex gap-2 pt-2">
+                    <button type="button" data-action="submit-login" class="w-1/2 bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-lg transition shadow-md cursor-pointer text-sm">Login</button>
+                    <button type="button" data-action="submit-register" class="w-1/2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition shadow-md cursor-pointer text-sm">Register</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard-screen" class="hidden flex-col flex-grow max-w-5xl mx-auto w-full p-4 md:p-8 space-y-6">
         
-        <div id="auth-screen" class="hidden w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden transition-all duration-300">
-            <div class="flex border-b border-slate-100 bg-slate-50">
-                <button id="tab-login" data-action="switch-auth" data-tab="login" class="w-1/2 py-4 text-center font-semibold text-sm tracking-wider uppercase border-b-2 border-sky-600 text-sky-600 cursor-pointer">Login</button>
-                <button id="tab-register" data-action="switch-auth" data-tab="register" class="w-1/2 py-4 text-center font-semibold text-sm tracking-wider uppercase border-b-2 border-transparent text-slate-400 hover:text-slate-600 cursor-pointer">Create Account</button>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-slate-900 text-white p-6 rounded-2xl shadow-lg">
+            <div class="flex items-center space-x-4 mb-4 sm:mb-0">
+                <img id="header-profile-pic" src="https://ui-avatars.com/api/?name=Crew&background=4f46e5&color=fff" class="w-12 h-12 rounded-full border-2 border-indigo-500 object-cover">
+                <div>
+                    <h2 class="heading-font text-2xl font-bold tracking-tight">S/V <span id="display-vessel" class="text-indigo-400">Vessel</span></h2>
+                    <p class="text-slate-400 text-sm">Crew: <span id="display-username" class="font-medium text-white">Name</span> <span id="admin-badge" class="hidden bg-amber-500/20 text-amber-400 text-[10px] px-1.5 py-0.5 rounded ml-1 font-bold uppercase">Captain</span></p>
+                </div>
+            </div>
+            <button data-action="logout" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 px-4 rounded-lg text-sm border border-slate-700 cursor-pointer">Disembark</button>
+        </div>
+
+        <div class="flex space-x-2 bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+            <button data-action="nav-tab" data-target="panel-races" class="nav-btn flex-1 py-2 text-sm font-bold rounded-lg bg-indigo-50 text-indigo-700 cursor-pointer">Racing Schedule</button>
+            <button data-action="nav-tab" data-target="panel-news" class="nav-btn flex-1 py-2 text-sm font-bold rounded-lg text-slate-500 hover:bg-slate-50 cursor-pointer">News Feed</button>
+            <button data-action="nav-tab" data-target="panel-settings" class="nav-btn flex-1 py-2 text-sm font-bold rounded-lg text-slate-500 hover:bg-slate-50 cursor-pointer">My Gear & Settings</button>
+        </div>
+
+        <div id="panel-races" class="nav-panel space-y-6">
+            <div id="admin-race-creator" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Draft New Event</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 mb-1">Race Name</label><input type="text" id="ev-name" class="w-full p-2 border border-slate-200 rounded outline-none focus:border-indigo-500 text-sm"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 mb-1">Start Date</label><input type="date" id="ev-date" class="w-full p-2 border border-slate-200 rounded outline-none text-sm"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 mb-1">Spaces</label><input type="number" id="ev-spaces" class="w-full p-2 border border-slate-200 rounded outline-none text-sm" placeholder="10"></div>
+                    <div class="md:col-span-4 flex justify-end"><button data-action="create-race" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold py-2 px-6 rounded cursor-pointer">Log Race</button></div>
+                </div>
             </div>
             
-            <div class="p-6 md:p-8">
-                <div id="form-login" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Username / Name</label>
-                        <input type="text" id="login-username" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition" placeholder="e.g., rosaire">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Password</label>
-                        <input type="password" id="login-password" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition" placeholder="••••••••">
-                    </div>
-                    
-                    <div class="flex items-center justify-between text-xs font-medium text-slate-500 py-1">
-                        <label class="flex items-center space-x-2 cursor-pointer select-none">
-                            <input type="checkbox" id="login-remember" class="rounded border-slate-300 text-sky-600 focus:ring-sky-500 h-4 w-4 cursor-pointer">
-                            <span>Keep me logged in on this device</span>
-                        </label>
-                    </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Fleet Manifest</h3>
+                <div id="race-list" class="space-y-3"></div>
+            </div>
+        </div>
 
-                    <div id="login-error" class="text-rose-500 text-sm hidden"></div>
-                    <button type="button" data-action="submit-login" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-3 rounded-lg transition shadow-md cursor-pointer text-center font-semibold">Sign In</button>
+        <div id="panel-news" class="nav-panel hidden space-y-6">
+            <div id="admin-news-creator" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">Broadcast to Crew</h3>
+                <textarea id="news-text" rows="3" class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm" placeholder="What's the plan, Captain?"></textarea>
+                <div class="flex items-center justify-between">
+                    <input type="file" id="news-image" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    <button data-action="post-news" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg text-sm cursor-pointer shadow-sm">Post Broadcast</button>
+                </div>
+            </div>
+            <div id="news-feed-container" class="space-y-4"></div>
+        </div>
+
+        <div id="panel-settings" class="nav-panel hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+                
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Profile & Identification</h3>
+                    <div class="flex items-center space-x-6">
+                        <img id="settings-pic-preview" src="" class="w-20 h-20 rounded-full bg-slate-100 border border-slate-200 object-cover">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Upload Photo</label>
+                            <input type="file" id="settings-pic-upload" accept="image/*" class="text-xs text-slate-500 mb-2">
+                        </div>
+                    </div>
                 </div>
 
-                <div id="form-register" class="space-y-4 hidden">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Email Address</label>
-                        <input type="email" id="reg-email" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition" placeholder="crew@example.com">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Automated Notifications</h3>
+                    <div class="space-y-3 max-w-sm">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Email Address</label>
+                            <input type="email" id="settings-email" class="w-full p-2 border border-slate-200 rounded outline-none text-sm" placeholder="crew@email.com">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Phone Number (SMS)</label>
+                            <input type="tel" id="settings-phone" class="w-full p-2 border border-slate-200 rounded outline-none text-sm" placeholder="555-123-4567">
+                        </div>
+                        <div class="pt-2 space-y-2">
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="pref-email" class="rounded text-indigo-600 w-4 h-4 cursor-pointer">
+                                <span class="text-sm font-semibold text-slate-700">Receive Email Reminders</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="pref-sms" class="rounded text-indigo-600 w-4 h-4 cursor-pointer">
+                                <span class="text-sm font-semibold text-slate-700">Receive Text (SMS) Reminders</span>
+                            </label>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Desired Username</label>
-                        <input type="text" id="reg-username" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition" placeholder="SailingPro">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Password</label>
-                        <input type="password" id="reg-password" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition" placeholder="••••••••">
-                    </div>
-                    <div id="register-error" class="text-rose-500 text-sm hidden"></div>
-                    <button type="button" data-action="submit-register" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-medium py-3 rounded-lg transition shadow-md cursor-pointer text-center font-semibold">Register Account</button>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100">
+                    <button data-action="save-settings" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg text-sm cursor-pointer shadow">Save Settings</button>
+                    <span id="settings-save-notice" class="text-emerald-600 text-xs font-bold ml-3 hidden">Settings Saved!</span>
                 </div>
             </div>
         </div>
 
-        <div id="dashboard-screen" class="hidden w-full space-y-6 animate-fade-in">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between bg-slate-900 text-white p-6 rounded-2xl shadow-lg w-full">
-                <div class="flex items-center space-x-4 mb-4 md:mb-0">
-                    <div class="bg-sky-500 p-2.5 rounded-xl text-white">
-                        <svg class="w-7 h-7" viewBox="0 0 100 100" fill="currentColor"><path d="M 15 65 C 35 68, 70 65, 85 55 C 70 58, 30 58, 20 52 Z M 45 61 L 48 78 L 54 78 L 52 61 Z M 50 12 L 50 58 M 49 14 C 40 28, 28 42, 22 50 C 35 50, 45 52, 49 55 Z" /></svg>
-                    </div>
-                    <div>
-                        <h2 class="heading-font text-2xl font-bold tracking-tight">The Arrow Dashboard</h2>
-                        <p class="text-slate-400 text-sm">Logged in as: <span id="user-display-name" class="text-sky-400 font-medium"></span> <span id="admin-badge" class="hidden bg-amber-500/20 text-amber-400 text-xs px-2 py-0.5 rounded ml-1 font-semibold uppercase tracking-wider">Admin</span></p>
-                    </div>
-                </div>
-                <div class="flex flex-wrap gap-3">
-                    <button id="btn-modify-events" data-action="toggle-admin" class="hidden bg-amber-600 hover:bg-amber-500 text-white font-medium py-2 px-4 rounded-lg text-sm transition shadow cursor-pointer font-semibold">
-                        🔧 Modify Events & Crew
-                    </button>
-                    <button data-action="logout" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2 px-4 rounded-lg text-sm transition border border-slate-700 cursor-pointer">
-                        Log Out
-                    </button>
-                </div>
-            </div>
-
-            <div id="admin-panel" class="hidden bg-white p-6 rounded-2xl shadow-md border border-amber-100 space-y-6 w-full">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <h3 class="heading-font text-xl font-bold text-slate-900">Fleet Command Center</h3>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Independent Server Matrix Connected</span>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <div class="md:col-span-4"><h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Create New Race Event</h4></div>
-                    
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Race Name *</label>
-                        <input type="text" id="event-name" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Start Date *</label>
-                        <input type="date" id="event-start-date" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Start Time *</label>
-                        <input type="time" id="event-start-time" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none">
-                    </div>
-                    
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Start Location *</label>
-                        <input type="text" id="event-start-loc" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none" placeholder="e.g., Toronto Harbour">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">End Date (Single Instance)</label>
-                        <input type="date" id="event-end-date" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">End Time</label>
-                        <input type="time" id="event-end-time" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none">
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-medium text-slate-500 mb-1">End Location *</label>
-                        <input type="text" id="event-end-loc" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none" placeholder="e.g., Oakville">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Spaces Available *</label>
-                        <input type="number" id="event-spaces" min="1" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none" placeholder="12">
-                    </div>
-                    
-                    <div class="md:col-span-4 border-t border-b border-slate-200/60 py-4 my-1 space-y-3">
-                        <div class="flex items-center space-x-2">
-                            <input type="checkbox" id="event-is-repeating" data-action="toggle-repeat" class="rounded border-slate-300 text-sky-600 focus:ring-sky-500 h-4 w-4 cursor-pointer">
-                            <label for="event-is-repeating" class="text-xs font-bold text-slate-700 uppercase tracking-wider cursor-pointer">Enable Recurring Schedule (Explode into Independent Events)</label>
-                        </div>
-                        
-                        <div id="admin-repeat-days-selector" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-3 rounded-lg border border-slate-200/80 animate-fade-in">
-                            <div class="md:col-span-2 space-y-1.5">
-                                <span class="block text-[11px] text-slate-400 font-bold uppercase">Select Repetition Days:</span>
-                                <div class="flex flex-wrap gap-1.5">
-                                    <label class="cursor-pointer select-none"><input type="checkbox" value="Sunday" class="repeat-day-cb hidden peer"><span class="px-2.5 py-1 text-xs font-medium rounded-md border border-slate-200 bg-white text-slate-600 peer-checked:bg-sky-600 peer-checked:border-sky-600 peer-checked:text-white transition block">Sun</span></label>
-                                    <label class="cursor-pointer select-none"><input type="checkbox" value="Monday" class="repeat-day-cb hidden peer"><span class="px-2.5 py-1 text-xs font-medium rounded-md border border-slate-200 bg-white text-slate-600 peer-checked:bg-sky-600 peer-checked:border-sky-600 peer-checked:text-white transition block">Mon</span></label>
-                                    <label class="cursor-pointer select-none"><input type="checkbox" value="Tuesday" class="repeat-day-cb hidden peer"><span class="px-2.5 py-1 text-xs font-medium rounded-md border border-slate-200 bg-white text-slate-600 peer-checked:bg-sky-600 peer-checked:border-sky-600 peer-checked:text-white transition block">Tue</span></label>
-                                    <label class="cursor-pointer select-none"><input type="checkbox" value="Wednesday" class="repeat-day-cb hidden peer"><span class="px-2.5 py-1 text-xs font-medium rounded-md border border-slate-200 bg-white text-slate-600 peer-checked:bg-sky-600 peer-checked:border-sky-600 peer-checked:text-white transition block">Wed</span></label>
-                                    <label class="cursor-pointer select-none"><input type="checkbox" value="Thursday" class="repeat-day-cb hidden peer"><span class="px-2.5 py-1 text-xs font-medium rounded-md border border-slate-200 bg-white text-slate-600 peer-checked:bg-sky-600 peer-checked:border-sky-600 peer-checked:text-white transition block">Thu</span></label>
-                                    <label class="cursor-pointer select-none"><input type="checkbox" value="Friday" class="repeat-day-cb hidden peer"><span class="px-2.5 py-1 text-xs font-medium rounded-md border border-slate-200 bg-white text-slate-600 peer-checked:bg-sky-600 peer-checked:border-sky-600 peer-checked:text-white transition block">Fri</span></label>
-                                    <label class="cursor-pointer select-none"><input type="checkbox" value="Saturday" class="repeat-day-cb hidden peer"><span class="px-2.5 py-1 text-xs font-medium rounded-md border border-slate-200 bg-white text-slate-600 peer-checked:bg-sky-600 peer-checked:border-sky-600 peer-checked:text-white transition block">Sat</span></label>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-[11px] text-slate-400 font-bold uppercase mb-1.5">Stop Recurring Date: *</label>
-                                <input type="date" id="event-repeat-stop-date" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs focus:outline-none">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="md:col-span-3">
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Notes / Instructions</label>
-                        <input type="text" id="event-notes" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none" placeholder="Safety gear required...">
-                    </div>
-
-                    <div id="admin-form-error" class="hidden md:col-span-4 p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold rounded-lg animate-fade-in"></div>
-
-                    <div class="flex items-end md:col-span-1">
-                        <button type="button" data-action="create-event" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium py-2 rounded-lg shadow-sm transition cursor-pointer text-center font-semibold">＋ Add Race</button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col justify-between">
-                        <div>
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Quick Fleet Removal Index</h4>
-                            <div id="admin-purge-list" class="space-y-2 max-h-64 overflow-y-auto text-sm pr-1">
-                                </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
-                        <div>
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Crew Registry & Access Level Control</h4>
-                            <p class="text-[11px] text-slate-400 mb-3">Directly create new accounts, flip crew levels, or remove them entirely.</p>
-                        </div>
-                        
-                        <div id="form-admin-add-user" class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white p-3 rounded-lg border border-slate-200">
-                            <input type="email" id="admin-user-email" placeholder="Email Address" class="px-2 py-1.5 border border-slate-200 rounded text-xs outline-none focus:border-sky-500">
-                            <input type="text" id="admin-user-name" placeholder="Username" class="px-2 py-1.5 border border-slate-200 rounded text-xs outline-none focus:border-sky-500">
-                            <input type="password" id="admin-user-pass" placeholder="Password" class="px-2 py-1.5 border border-slate-200 rounded text-xs outline-none focus:border-sky-500">
-                            <div class="flex items-center justify-between gap-1">
-                                <label class="text-[11px] text-slate-500 flex items-center space-x-1 cursor-pointer">
-                                    <input type="checkbox" class="rounded text-sky-600">
-                                    <span>Give Admin?</span>
-                                </label>
-                                <button type="button" data-action="submit-admin-add-user" class="bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-semibold px-2 py-1 rounded transition cursor-pointer text-center">Add Member</button>
-                            </div>
-                        </div>
-
-                        <div class="bg-white border border-slate-200 rounded-lg p-2">
-                            <div class="text-[11px] font-bold text-slate-500 border-b border-slate-100 pb-1 mb-2">Authorized Fleet Manifest</div>
-                            <div id="admin-crew-privilege-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
-                                </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col w-full">
-                <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
-                    <h3 class="heading-font text-lg font-bold text-slate-900">Upcoming Racing Schedule</h3>
-                    <button data-action="sync-cloud" class="text-sky-600 text-xs font-semibold hover:text-sky-500 flex items-center cursor-pointer">🔄 Sync Roster</button>
-                </div>
-
-                <div id="app-toast-notice" class="hidden bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl p-3 mb-4 flex items-center space-x-2 animate-fade-in">
-                    <span>⚓</span> <span id="toast-text"></span>
-                </div>
-
-                <div id="race-list-container" class="space-y-4 w-full">
-                    </div>
-            </div>
-        </main>
-
-    <footer class="w-full text-center py-4 text-xs text-slate-400 border-t border-slate-100 bg-white">
-        &copy; 2026 Fleet Command &bull; The Arrow Tactical System
-    </footer>
-
     <script>
-        let users = [];
-        let races = [];
+        let db = { users: [], races: [], news: [] };
         let currentUser = null;
-        let selectedRaceId = null;
-        let editingRaceId = null; 
 
-        let raceDeleteConfirmId = null;
-        let crewDeleteConfirmName = null;
-
-        // Clean native REST saving engine (No more URL restrictions)
-        async function saveState() {
-            if (window.localStorage) {
-                localStorage.setItem('arrow_remembered_user', currentUser ? currentUser.username : '');
-            }
+        async function init() {
             try {
-                await fetch('/api/save', {
+                const res = await fetch('/api/data');
+                db = await res.json();
+            } catch (e) { console.warn("Using default memory array"); }
+        }
+        init();
+
+        // DELTA MERGE FUNCTION: Sends only the targeted change, then pulls the freshly merged DB
+        async function saveDB(mutationType, mutationData) {
+            try {
+                const res = await fetch('/api/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ users, races })
+                    body: JSON.stringify({ mutation: mutationType, data: mutationData })
                 });
-            } catch(e) {
-                console.error("Database sync fault: ", e);
-            }
-        }
-
-        async function fetchCloudData() {
-            try {
-                const response = await fetch('/api/data');
-                const db = await response.json();
-                users = db.users || [];
-                races = db.races || [];
                 
-                renderRaceList();
-                renderAdminPurgeList();
-                renderAdminCrewList();
-            } catch(e) {
-                console.error("Database fetch fault: ", e);
-            }
-        }
-
-        function tryRememberedLogin() {
-            if (!window.localStorage) return false;
-            const rememberedUser = localStorage.getItem('arrow_remembered_user');
-            if (rememberedUser && users.length > 0) {
-                const match = users.find(u => u.username.toLowerCase() === rememberedUser.toLowerCase());
-                if (match) {
-                    currentUser = match;
-                    launchDashboard();
-                    return true;
+                const response = await res.json();
+                
+                // Instantly update our local screen with the server's combined truth
+                if (response.status === 'success' && response.db) {
+                    db = response.db;
+                    
+                    // Keep our currentUser object synced with the DB version
+                    if (currentUser) {
+                        const updatedMe = db.users.find(u => u.username === currentUser.username && u.vessel === currentUser.vessel);
+                        if (updatedMe) currentUser = updatedMe;
+                    }
+                    
+                    if (currentUser) {
+                        renderRaces();
+                        renderNews();
+                    }
                 }
-            }
-            return false;
+            } catch (e) { console.error("Save failed", e); }
         }
 
-        function formatToLocalYYYYMMDD(dateObj) {
-            const y = dateObj.getFullYear();
-            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const d = String(dateObj.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
         }
 
-        function showInAppToast(text) {
-            const banner = document.getElementById('app-toast-notice');
-            const textField = document.getElementById('toast-text');
-            if(!banner || !textField) return;
-            textField.textContent = text;
-            banner.classList.remove('hidden');
-            setTimeout(() => { banner.classList.add('hidden'); }, 4500);
-        }
-
-        // --- GLOBAL PASSIVE CLICK CONTROLLER MATRIX ---
-        document.addEventListener('click', function(event) {
-            const target = event.target.closest('[data-action]');
+        document.addEventListener('click', async function(e) {
+            const target = e.target.closest('[data-action]');
             if (!target) return;
             const action = target.getAttribute('data-action');
-
-            if (action === 'dismiss-splash') {
-                document.getElementById('splash-screen').classList.add('opacity-0');
-                setTimeout(() => {
-                    document.getElementById('splash-screen').classList.add('hidden');
-                    if (!tryRememberedLogin()) {
-                        document.getElementById('auth-screen').classList.remove('hidden');
-                        switchAuthTab('login');
-                    }
-                }, 400);
-            } 
-            else if (action === 'switch-auth') {
-                switchAuthTab(target.getAttribute('data-tab'));
-            } 
-            else if (action === 'toggle-repeat') {
-                toggleRepeatDaysContainer();
-            }
-            else if (action === 'submit-login') {
-                handleLogin();
-            }
-            else if (action === 'submit-register') {
-                handleRegister();
-            }
-            else if (action === 'create-event') {
-                handleCreateEvent();
-            }
-            else if (action === 'submit-admin-add-user') {
-                handleAdminAddUser();
-            }
-            else if (action === 'toggle-admin') {
-                const panel = document.getElementById('admin-panel');
-                panel.classList.toggle('hidden');
-                if (!panel.classList.contains('hidden')) {
-                    renderAdminPurgeList(); renderAdminCrewList();
-                }
-            } 
-            else if (action === 'logout') {
-                currentUser = null; selectedRaceId = null; editingRaceId = null;
-                raceDeleteConfirmId = null; crewDeleteConfirmName = null;
-                if (window.localStorage) localStorage.removeItem('arrow_remembered_user');
-                document.getElementById('dashboard-screen').classList.add('hidden');
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('admin-panel').classList.add('hidden');
-            } 
-            else if (action === 'sync-cloud') {
-                fetchCloudData().then(() => showInAppToast("Roster registries refreshed."));
-            }
-            else if (action === 'toggle-accordion') {
-                const raceId = target.getAttribute('data-id');
-                selectedRaceId = (selectedRaceId === raceId) ? null : raceId;
-                editingRaceId = null; renderRaceList();
-            }
-            else if (action === 'purge-list-delete' || action === 'delete-active-event') {
-                executeInlineRacePurge(target.getAttribute('data-id') || selectedRaceId);
-            }
-            else if (action === 'rsvp') {
-                submitRSVP(target.getAttribute('data-status'));
-            }
-            else if (action === 'toggle-crew-admin') {
-                const username = target.getAttribute('data-username');
-                const targetUser = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-                if (targetUser) {
-                    targetUser.isAdmin = !targetUser.isAdmin; saveState();
-                    renderAdminCrewList(); launchDashboard(); 
-                }
-            }
-            else if (action === 'delete-crew-member') {
-                executeInlineCrewPurge(target.getAttribute('data-username'));
-            }
-            else if (action === 'inline-edit-toggle') { editingRaceId = target.getAttribute('data-id'); renderRaceList(); }
-            else if (action === 'inline-edit-cancel') { editingRaceId = null; renderRaceList(); }
-            else if (action === 'inline-edit-save') { saveInlineModifiedEvent(target.getAttribute('data-id')); }
-        });
-
-        function handleLogin() {
-            const userInp = document.getElementById('login-username').value.trim();
-            const passInp = document.getElementById('login-password').value;
-            const rememberMeChecked = document.getElementById('login-remember').checked;
-            const foundUser = users.find(u => u.username.toLowerCase() === userInp.toLowerCase() && u.password === passInp);
-            
-            if (foundUser) {
-                currentUser = foundUser;
-                if (rememberMeChecked && window.localStorage) {
-                    localStorage.setItem('arrow_remembered_user', foundUser.username);
-                }
-                launchDashboard();
-            } else {
-                document.getElementById('login-error').textContent = "Invalid username or password configuration.";
-                document.getElementById('login-error').classList.remove('hidden');
-            }
-        }
-
-        function handleRegister() {
-            const email = document.getElementById('reg-email').value.trim();
-            const username = document.getElementById('reg-username').value.trim();
-            const password = document.getElementById('reg-password').value;
-            if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
-                document.getElementById('register-error').textContent = "Username already exists.";
-                document.getElementById('register-error').classList.remove('hidden');
-                return;
-            }
-            const newUser = { email, username, password, isAdmin: false };
-            users.push(newUser); saveState(); currentUser = newUser;
-            launchDashboard();
-        }
-
-        function handleAdminAddUser() {
-            const adminPanel = document.getElementById('admin-panel');
-            const email = adminPanel.querySelector('#admin-user-email').value.trim();
-            const username = adminPanel.querySelector('#admin-user-name').value.trim();
-            const password = adminPanel.querySelector('#admin-user-pass').value;
-            const isAdmin = adminPanel.querySelector('#form-admin-add-user input[type="checkbox"]').checked;
-            if (!email || !username || !password) return;
-            if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
-                alert("Username profile already assigned."); return;
-            }
-            users.push({ email, username, password, isAdmin }); saveState();
-            adminPanel.querySelector('#admin-user-email').value = '';
-            adminPanel.querySelector('#admin-user-name').value = '';
-            adminPanel.querySelector('#admin-user-pass').value = '';
-            adminPanel.querySelector('#form-admin-add-user input[type="checkbox"]').checked = false;
-            renderAdminCrewList();
-        }
-
-        function switchAuthTab(tab) {
-            document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
-            document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
-            document.getElementById('tab-login').className = tab === 'login' ? "w-1/2 py-4 text-center font-semibold text-sm tracking-wider uppercase border-b-2 border-sky-600 text-sky-600 cursor-pointer" : "w-1/2 py-4 text-center font-semibold text-sm tracking-wider uppercase border-b-2 border-transparent text-slate-400 hover:text-slate-600 cursor-pointer";
-            document.getElementById('tab-register').className = tab === 'register' ? "w-1/2 py-4 text-center font-semibold text-sm tracking-wider uppercase border-b-2 border-sky-600 text-sky-600 cursor-pointer" : "w-1/2 py-4 text-center font-semibold text-sm tracking-wider uppercase border-b-2 border-transparent text-slate-400 hover:text-slate-600 cursor-pointer";
-        }
-
-        function launchDashboard() {
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('dashboard-screen').classList.remove('hidden');
-            document.getElementById('user-display-name').textContent = currentUser.username;
-            document.getElementById('admin-badge').classList.toggle('hidden', !currentUser.isAdmin);
-            document.getElementById('btn-modify-events').classList.toggle('hidden', !currentUser.isAdmin);
-            renderRaceList();
-        }
-
-        function renderRaceList() {
-            const container = document.getElementById('race-list-container');
-            container.innerHTML = '';
-            if (races.length === 0) {
-                container.innerHTML = `<p class="text-sm text-slate-400 italic text-center py-4">No events scheduled.</p>`; return;
-            }
-            races.sort((a, b) => new Date((a.startDate || '2026-01-01') + 'T' + (a.startTime || '00:00')) - new Date((b.startDate || '2026-01-01') + 'T' + (b.startTime || '00:00')));
-
-            races.forEach(race => {
-                const isSelected = race.id === selectedRaceId;
-                const isEditing = race.id === editingRaceId;
-                const card = document.createElement('div');
-                card.className = `border rounded-xl transition-all duration-200 overflow-hidden ${isSelected ? 'bg-slate-50 border-sky-600 shadow-md' : 'bg-white hover:bg-slate-50 border-slate-200'}`;
-                
-                const startStr = formatDate(race.startDate);
-                const endStr = formatDate(race.endDate);
-                const displayDate = startStr === endStr ? startStr : `${startStr} - ${endStr}`;
-                const displayTime = race.startTime ? `@ ${formatTime(race.startTime)}` : '';
-
-                const headerRow = document.createElement('div');
-                headerRow.setAttribute('data-action', 'toggle-accordion');
-                headerRow.setAttribute('data-id', race.id);
-                headerRow.className = "p-4 flex flex-col sm:flex-row sm:items-center justify-between cursor-pointer select-none gap-2";
-                headerRow.innerHTML = `
-                    <div>
-                        <h4 class="font-bold text-base tracking-tight text-slate-900">${race.name}</h4>
-                        <p class="text-xs text-slate-500 flex items-center mt-1">
-                            <svg class="w-3.5 h-3.5 mr-1 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            ${displayDate} ${displayTime}
-                        </p>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-xs font-semibold px-2 py-1 rounded bg-sky-100 text-sky-800">${Object.values(race.rsvps || {}).filter(v=>v==='going').length} / ${race.spaces} Claims</span>
-                        <span class="text-slate-400 text-lg transform transition-transform duration-200 ${isSelected ? 'rotate-180' : ''}">▼</span>
-                    </div>
-                `;
-                card.appendChild(headerRow);
-
-                if (isSelected) {
-                    const expandedArea = document.createElement('div');
-                    expandedArea.className = "border-t border-slate-200/80 p-5 bg-white space-y-6 animate-fade-in";
-
-                    if (isEditing && currentUser.isAdmin) {
-                        expandedArea.innerHTML = `
-                            <div class="space-y-4">
-                                <div class="border-b border-slate-100 pb-2"><h5 class="text-xs font-bold text-amber-600 uppercase tracking-wider">Modify Race Parameters</h5></div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                                    <div><label class="block font-semibold mb-1 text-slate-500">Race Title</label><input type="text" id="edit-name-${race.id}" value="${race.name}" class="w-full p-2 border border-slate-200 rounded"></div>
-                                    <div><label class="block font-semibold mb-1 text-slate-500">Slots Count</label><input type="number" id="edit-spaces-${race.id}" value="${race.spaces}" class="w-full p-2 border border-slate-200 rounded"></div>
-                                    <div><label class="block font-semibold mb-1 text-slate-500">Start Date</label><input type="date" id="edit-start-date-${race.id}" value="${race.startDate}" class="w-full p-2 border border-slate-200 rounded"></div>
-                                    <div><label class="block font-semibold mb-1 text-slate-500">Start Time</label><input type="time" id="edit-start-time-${race.id}" value="${race.startTime || ''}" class="w-full p-2 border border-slate-200 rounded"></div>
-                                    <div><label class="block font-semibold mb-1 text-slate-500">End Date</label><input type="date" id="edit-end-date-${race.id}" value="${race.endDate}" class="w-full p-2 border border-slate-200 rounded"></div>
-                                    <div><label class="block font-semibold mb-1 text-slate-500">End Time</label><input type="time" id="edit-end-time-${race.id}" value="${race.endTime || ''}" class="w-full p-2 border border-slate-200 rounded"></div>
-                                    <div><label class="block font-semibold mb-1 text-slate-500">Departure From</label><input type="text" id="edit-start-loc-${race.id}" value="${race.startLoc}" class="w-full p-2 border border-slate-200 rounded"></div>
-                                    <div><label class="block font-semibold mb-1 text-slate-500">Arrival To</label><input type="text" id="edit-end-loc-${race.id}" value="${race.endLoc}" class="w-full p-2 border border-slate-200 rounded"></div>
-                                    <div class="md:col-span-2"><label class="block font-semibold mb-1 text-slate-500">Tactical Directives / Notes</label><input type="text" id="edit-notes-${race.id}" value="${race.notes || ''}" class="w-full p-2 border border-slate-200 rounded"></div>
-                                </div>
-                                <div class="flex justify-end space-x-2 pt-2">
-                                    <button data-action="inline-edit-cancel" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 font-semibold text-xs rounded text-slate-700 cursor-pointer">Cancel</button>
-                                    <button data-action="inline-edit-save" data-id="${race.id}" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 font-semibold text-xs rounded text-white cursor-pointer shadow-sm">Save Parameters</button>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        let userStatus = race.rsvps ? race.rsvps[currentUser.username] : null;
-                        let deleteBtnLabel = (raceDeleteConfirmId === race.id) ? "⚠️ Confirm Purge" : "✕ Delete Event";
-                        let deleteBtnClass = (raceDeleteConfirmId === race.id) ? "bg-rose-600 text-white hover:bg-rose-700" : "bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100";
-
-                        let actionButtonsHTML = `
-                            <div class="flex flex-wrap gap-2 text-xs border-b border-slate-100 pb-4">
-                                <button data-action="inline-edit-toggle" data-id="${race.id}" class="px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded hover:bg-amber-100 cursor-pointer font-medium">📝 Edit Parameters</button>
-                                <button data-action="delete-active-event" data-id="${race.id}" class="px-3 py-1.5 rounded cursor-pointer font-bold transition-all duration-150 ${deleteBtnClass}">${deleteBtnLabel}</button>
-                            </div>
-                        `;
-                        
-                        expandedArea.innerHTML = `
-                            ${currentUser.isAdmin ? actionButtonsHTML : ''}
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                    <span class="block font-bold text-slate-400 uppercase tracking-wider mb-1">Departure Setup</span>
-                                    <p class="font-bold text-slate-800">${formatDate(race.startDate)} at ${formatTime(race.startTime)}</p>
-                                    <p class="text-slate-500 mt-0.5">Location: <span class="font-medium text-slate-700">${race.startLoc}</span></p>
-                                </div>
-                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                    <span class="block font-bold text-slate-400 uppercase tracking-wider mb-1">Arrival Target</span>
-                                    <p class="font-bold text-slate-800">${formatDate(race.endDate || race.startDate)} at ${formatTime(race.endTime || race.startTime)}</p>
-                                    <p class="text-slate-500 mt-0.5">Location: <span class="font-medium text-slate-700">${race.endLoc || race.startLoc}</span></p>
-                                </div>
-                            </div>
-                            <div>
-                                <span class="block font-bold text-slate-400 uppercase tracking-wider text-xs mb-1">Tactical Notes & Directives</span>
-                                <div class="bg-slate-50 p-4 rounded-xl text-xs text-slate-700 italic border border-slate-100">${race.notes || "No additional directives logged."}</div>
-                            </div>
-                            <div class="border-t border-slate-100 pt-4 space-y-3">
-                                <div class="text-xs font-bold text-slate-900">Your Availability Status</div>
-                                <div class="grid grid-cols-3 gap-2 max-w-sm text-xs">
-                                    <button data-action="rsvp" data-status="going" class="py-2 px-1 rounded-lg border text-center transition cursor-pointer font-semibold ${userStatus==='going'?'bg-emerald-600 border-emerald-600 text-white font-bold':'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'}">⚓ I'll Be There</button>
-                                    <button data-action="rsvp" data-status="maybe" class="py-2 px-1 rounded-lg border text-center transition cursor-pointer font-semibold ${userStatus==='maybe'?'bg-amber-500 border-amber-500 text-white font-bold':'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'}">❓ Not Sure</button>
-                                    <button data-action="rsvp" data-status="declined" class="py-2 px-1 rounded-lg border text-center transition cursor-pointer font-semibold ${userStatus==='declined'?'bg-rose-600 border-rose-600 text-white font-bold':'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'}">✕ Out</button>
-                                </div>
-                                <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 mt-3">
-                                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Live Race Attendance Manifest</div>
-                                    <div id="inline-manifest-${race.id}" class="space-y-1.5 text-xs max-h-40 overflow-y-auto pr-1"></div>
-                                </div>
-                            </div>
-                        `;
-                        
-                        setTimeout(() => { renderInlineManifestList(race); }, 10);
-                    }
-                    card.appendChild(expandedArea);
-                }
-                container.appendChild(card);
-            });
-        }
-
-        function renderInlineManifestList(race) {
-            const manifestContainer = document.getElementById(`inline-manifest-${race.id}`);
-            if (!manifestContainer) return;
-            manifestContainer.innerHTML = '';
-            
-            const rsvps = race.rsvps || {};
-            const registeredUsers = Object.keys(rsvps);
-
-            if (registeredUsers.length === 0) {
-                manifestContainer.innerHTML = `<p class="text-slate-400 italic">No submissions made yet.</p>`;
-                return;
-            }
-
-            registeredUsers.forEach(username => {
-                const status = rsvps[username];
-                let badgeClass = status==='going' ? "bg-emerald-100 text-emerald-800" : (status==='maybe'?"bg-amber-100 text-amber-800":"bg-rose-100 text-rose-800");
-                let statusText = status==='going' ? "⚓ Confirmed" : (status==='maybe'?"❓ Tentative":"✕ Out");
-
-                const node = document.createElement('div');
-                node.className = "flex justify-between items-center py-1 border-b border-slate-100 last:border-none";
-                
-                const nameSpan = document.createElement('span');
-                nameSpan.className = "font-medium text-slate-700";
-                nameSpan.textContent = `${username} ${username === currentUser.username ? '(You)' : ''}`;
-                node.appendChild(nameSpan);
-
-                if (currentUser.isAdmin) {
-                    const select = document.createElement('select');
-                    select.className = "text-[11px] border border-slate-200 rounded px-1 py-0.5 outline-none font-medium bg-white";
-                    select.innerHTML = `
-                        <option value="going" ${status === 'going' ? 'selected' : ''}>⚓ Confirmed</option>
-                        <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>❓ Tentative</option>
-                        <option value="declined" ${status === 'declined' ? 'selected' : ''}>✕ Out</option>
-                    `;
-                    select.addEventListener('change', function() { 
-                        adminModifyCrewRSVP(race.id, username, this.value); 
-                    });
-                    node.appendChild(select);
-                } else {
-                    const statusSpan = document.createElement('span');
-                    statusSpan.className = `text-[10px] px-2 py-0.5 rounded-full font-bold ${badgeClass}`;
-                    statusSpan.textContent = statusText;
-                    node.appendChild(statusSpan);
-                }
-                
-                manifestContainer.appendChild(node);
-            });
-        }
-
-        function renderAdminPurgeList() {
-            const listContainer = document.getElementById('admin-purge-list');
-            if (!listContainer) return; listContainer.innerHTML = '';
-            if (races.length === 0) { listContainer.innerHTML = `<p class="text-xs text-slate-400 italic">No events mapped.</p>`; return; }
-
-            races.forEach(race => {
-                const item = document.createElement('div');
-                item.className = "flex items-center justify-between bg-white border border-slate-200 rounded-lg p-2 shadow-xs";
-                
-                let labelText = (raceDeleteConfirmId === race.id) ? "⚠️ Confirm" : "✕ Cancel";
-                let btnClass = (raceDeleteConfirmId === race.id) ? "bg-rose-600 text-white font-bold" : "bg-rose-50 text-rose-600 hover:bg-rose-100 font-medium";
-
-                item.innerHTML = `
-                    <div class="truncate mr-2">
-                        <span class="font-semibold text-slate-700 text-xs block truncate">${race.name}</span>
-                        <span class="block text-[10px] text-slate-400">${formatDate(race.startDate)}</span>
-                    </div>
-                    <button data-action="purge-list-delete" data-id="${race.id}" class="text-[11px] px-2 py-1 rounded transition-all duration-150 flex-shrink-0 cursor-pointer ${btnClass}">${labelText}</button>
-                `;
-                listContainer.appendChild(item);
-            });
-        }
-
-        function renderAdminCrewList() {
-            const container = document.getElementById('admin-crew-privilege-list');
-            if (!container) return; container.innerHTML = '';
-
-            users.forEach(u => {
-                const item = document.createElement('div');
-                item.className = "flex items-center justify-between bg-slate-50 p-1.5 rounded border border-slate-100 text-xs";
-                const isMe = u.username.toLowerCase() === currentUser.username.toLowerCase();
-                
-                let labelText = (crewDeleteConfirmName === u.username) ? "⚠️ Confirm" : "✕";
-                let btnClass = (crewDeleteConfirmName === u.username) ? "bg-rose-600 text-white font-bold px-2" : "bg-rose-50 text-rose-600 hover:bg-rose-100 px-2 font-medium";
-
-                let actionHTML = '';
-                if (isMe) {
-                    actionHTML = `<span class="text-[10px] text-slate-400 font-medium italic">Active Self</span>`;
-                } else {
-                    actionHTML = `
-                        <div class="flex items-center space-x-1">
-                            <button data-action="toggle-crew-admin" data-username="${u.username}" class="text-[10px] font-bold px-2 py-0.5 rounded transition cursor-pointer ${u.isAdmin?'bg-amber-100 text-amber-700':'bg-slate-200 text-slate-700'}">${u.isAdmin?'Demote':'Promote'}</button>
-                            <button data-action="delete-crew-member" data-username="${u.username}" class="text-[10px] py-0.5 rounded transition cursor-pointer duration-150 ${btnClass}">${labelText}</button>
-                        </div>
-                    `;
-                }
-
-                item.innerHTML = `<div class="truncate mr-2 flex flex-col"><span class="font-semibold text-slate-800">${u.username} ${u.isAdmin ? '<span class="text-[10px] bg-amber-500/20 text-amber-600 px-1 rounded font-bold uppercase">Admin</span>' : ''}</span><span class="text-[10px] text-slate-400 truncate">${u.email}</span></div><div>${actionHTML}</div>`;
-                container.appendChild(item);
-            });
-        }
-
-        function executeInlineRacePurge(id) {
-            if (raceDeleteConfirmId === id) {
-                races = races.filter(r => r.id !== id);
-                if (selectedRaceId === id) selectedRaceId = null;
-                raceDeleteConfirmId = null;
-                saveState();
-                renderRaceList();
-                renderAdminPurgeList();
-                showInAppToast("Race deleted from server database.");
-            } else {
-                raceDeleteConfirmId = id;
-                renderRaceList();
-                renderAdminPurgeList();
-                setTimeout(() => {
-                    if (raceDeleteConfirmId === id) {
-                        raceDeleteConfirmId = null;
-                        renderRaceList(); renderAdminPurgeList();
-                    }
-                }, 4000);
-            }
-        }
-
-        function executeInlineCrewPurge(username) {
-            if (crewDeleteConfirmName === username) {
-                users = users.filter(u => u.username.toLowerCase() !== username.toLowerCase());
-                crewDeleteConfirmName = null;
-                saveState();
-                renderAdminCrewList();
-                showInAppToast(`Profile "${username}" permanently cleared from server database.`);
-            } else {
-                crewDeleteConfirmName = username;
-                renderAdminCrewList();
-                setTimeout(() => {
-                    if (crewDeleteConfirmName === username) {
-                        crewDeleteConfirmName = null;
-                        renderAdminCrewList();
-                    }
-                }, 4000);
-            }
-        }
-
-        function saveInlineModifiedEvent(raceId) {
-            const raceIndex = races.findIndex(r => r.id === raceId);
-            if (raceIndex === -1 || !currentUser.isAdmin) return;
-
-            races[raceIndex] = {
-                ...races[raceIndex],
-                name: document.getElementById(`edit-name-${raceId}`).value.trim(),
-                spaces: parseInt(document.getElementById(`edit-spaces-${raceId}`).value) || 1,
-                startDate: document.getElementById(`edit-start-date-${raceId}`).value,
-                startTime: document.getElementById(`edit-start-time-${raceId}`).value,
-                endDate: document.getElementById(`edit-end-date-${raceId}`).value,
-                endTime: document.getElementById(`edit-end-time-${raceId}`).value,
-                startLoc: document.getElementById(`edit-start-loc-${raceId}`).value.trim(),
-                endLoc: document.getElementById(`edit-end-loc-${raceId}`).value.trim(),
-                notes: document.getElementById(`edit-notes-${raceId}`).value.trim()
-            };
-
-            saveState();
-            editingRaceId = null; 
-            renderRaceList();
-            renderAdminPurgeList();
-            showInAppToast("Race parameters updated.");
-        }
-
-        function toggleRepeatDaysContainer() {
-            const adminPanel = document.getElementById('admin-panel');
-            if(!adminPanel) return;
-
-            const cb = adminPanel.querySelector('#event-is-repeating');
-            const container = adminPanel.querySelector('#admin-repeat-days-selector');
-            if (!cb || !container) return;
-            
-            if (cb.checked) {
-                container.classList.remove('hidden');
-                container.style.display = 'grid'; 
-            } else {
-                container.classList.add('hidden');
-                container.style.display = 'none';
-                adminPanel.querySelectorAll('.repeat-day-cb').forEach(c => c.checked = false);
-                adminPanel.querySelector('#event-repeat-stop-date').value = '';
-            }
-        }
-
-        function handleCreateEvent() {
-            if (!currentUser || !currentUser.isAdmin) return;
-
-            const inlineError = document.getElementById('admin-form-error');
-            inlineError.classList.add('hidden');
-            inlineError.textContent = "";
-
-            try {
-                const adminPanel = document.getElementById('admin-panel');
-                const name = adminPanel.querySelector('#event-name').value.trim();
-                const startDate = adminPanel.querySelector('#event-start-date').value;
-                const startTime = adminPanel.querySelector('#event-start-time').value;
-                const startLoc = adminPanel.querySelector('#event-start-loc').value.trim();
-                const spaces = parseInt(adminPanel.querySelector('#event-spaces').value) || 0;
-                const notes = adminPanel.querySelector('#event-notes').value.trim();
-                const isRepeating = adminPanel.querySelector('#event-is-repeating').checked;
-
-                if (!name || !startDate || !startTime || !startLoc || spaces <= 0) {
-                    inlineError.textContent = "Submission Blocked: Missing parameters.";
-                    inlineError.classList.remove('hidden');
-                    return;
-                }
-
-                if (isRepeating) {
-                    const stopDateStr = adminPanel.querySelector('#event-repeat-stop-date').value;
-                    const endLoc = adminPanel.querySelector('#event-end-loc').value.trim() || startLoc;
-                    const endTime = adminPanel.querySelector('#event-end-time').value || startTime;
-                    
-                    let repeatDays = []; 
-                    adminPanel.querySelectorAll('.repeat-day-cb:checked').forEach(cb => repeatDays.push(cb.value));
-
-                    if (!stopDateStr || repeatDays.length === 0) { 
-                        inlineError.textContent = "Submission Blocked: Specify repeating parameters.";
-                        inlineError.classList.remove('hidden');
-                        return; 
-                    }
-                    
-                    let current = new Date(startDate + 'T00:00:00'); 
-                    let stopLimit = new Date(stopDateStr + 'T00:00:00');
-                    if (stopLimit < current) { 
-                        inlineError.textContent = "Submission Blocked: Cutoff date error.";
-                        inlineError.classList.remove('hidden');
-                        return; 
-                    }
-
-                    const dayMap = { "Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6 };
-                    const targetDayIndices = repeatDays.map(d => dayMap[d]);
-                    
-                    const singleEndInput = adminPanel.querySelector('#event-end-date').value || startDate;
-                    let dateSpanOffsetMs = new Date(singleEndInput + 'T00:00:00') - current;
-                    if (dateSpanOffsetMs < 0) dateSpanOffsetMs = 0;
-
-                    let generatedCount = 0; 
-                    let lastAddedId = null;
-
-                    while (current <= stopLimit) {
-                        if (targetDayIndices.includes(current.getDay())) {
-                            let instanceStartStr = formatToLocalYYYYMMDD(current);
-                            let instanceEndStr = formatToLocalYYYYMMDD(new Date(current.getTime() + dateSpanOffsetMs));
-                            let uniqueId = 'race-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
-                            
-                            races.push({ 
-                                id: uniqueId, name, startDate: instanceStartStr, startTime, endDate: instanceEndStr, endTime, startLoc, endLoc, spaces, notes, rsvps: {} 
-                            });
-                            lastAddedId = uniqueId; 
-                            generatedCount++;
-                        }
-                        current.setDate(current.getDate() + 1);
-                    }
-                    saveState(); 
-                    showInAppToast(`Success: Generated ${generatedCount} racing events.`);
-                    if (lastAddedId) selectedRaceId = lastAddedId;
-                } else {
-                    const endDate = adminPanel.querySelector('#event-end-date').value || startDate;
-                    const endTime = adminPanel.querySelector('#event-end-time').value || startTime;
-                    const endLoc = adminPanel.querySelector('#event-end-loc').value.trim() || startLoc;
-
-                    const standardId = 'race-' + Date.now();
-                    races.push({ id: standardId, name, startDate, startTime, endDate, endTime, startLoc, endLoc, spaces, notes, rsvps: {} });
-                    saveState(); 
-                    selectedRaceId = standardId; 
-                    showInAppToast("Success: Single race added.");
-                }
-                
-                adminPanel.querySelector('#event-name').value = '';
-                adminPanel.querySelector('#event-start-date').value = '';
-                adminPanel.querySelector('#event-start-time').value = '';
-                adminPanel.querySelector('#event-start-loc').value = '';
-                adminPanel.querySelector('#event-end-date').value = '';
-                adminPanel.querySelector('#event-end-time').value = '';
-                adminPanel.querySelector('#event-end-loc').value = '';
-                adminPanel.querySelector('#event-spaces').value = '';
-                adminPanel.querySelector('#event-notes').value = '';
-                adminPanel.querySelector('#event-is-repeating').checked = false;
-                
-                renderRaceList(); 
-                renderAdminPurgeList();
-                toggleRepeatDaysContainer();
-            } catch (err) {
-                inlineError.textContent = "Fault: " + err.message;
-                inlineError.classList.remove('hidden');
-            }
-        }
-
-        function submitRSVP(status) {
-            if (!selectedRaceId) return;
-            const race = races.find(r => r.id === selectedRaceId); if (!race) return;
-            if (!race.rsvps) race.rsvps = {};
-            race.rsvps[currentUser.username] = status; saveState(); selectRace(selectedRaceId);
-        }
-
-        function adminModifyCrewRSVP(raceId, targetUsername, newStatus) {
-            if (!currentUser.isAdmin) return;
-            const race = races.find(r => r.id === raceId);
-            if (race && race.rsvps) {
-                race.rsvps[targetUsername] = newStatus; saveState(); selectRace(raceId);
-            }
-        }
-
-        function selectRace(raceId) {
-            selectedRaceId = raceId; renderRaceList();
-        }
-
-        // Fire initialization data fetch instantly at startup
-        fetchCloudData();
-
-        function formatDate(dateStr) {
-            if (!dateStr) return '';
-            const options = { month: 'short', day: 'numeric', year: 'numeric' };
-            const dateObj = new Date(dateStr + 'T00:00:00');
-            return dateObj.toLocaleDateString('en-US', options);
-        }
-
-        function formatTime(timeStr) {
-            if (!timeStr || !timeStr.includes(':')) return '12:00 PM';
-            const [hours, minutes] = timeStr.split(':'); const h = parseInt(hours);
-            const ampm = h >= 12 ? 'PM' : 'AM'; const formattedHours = h % 12 || 12;
-            return `${formattedHours}:${minutes} ${ampm}`;
-        }
-    </script>
-</body>
-</html>
