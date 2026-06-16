@@ -571,7 +571,6 @@
                 target.classList.remove('text-slate-500'); 
                 target.classList.add('bg-indigo-50', 'text-indigo-700');
             }
-            // TOGGLE RSVP VIEW
             else if (action === 'toggle-rsvps') {
                 const raceId = target.getAttribute('data-id');
                 const listEl = document.getElementById('rsvp-list-' + raceId);
@@ -584,7 +583,6 @@
                     }
                 }
             }
-            // OPEN EDIT MODAL
             else if (action === 'open-edit-modal') {
                 const raceId = target.getAttribute('data-id');
                 const race = db.races.find(r => r.id === raceId);
@@ -602,11 +600,9 @@
                     document.getElementById('edit-event-modal').classList.remove('hidden');
                 }
             }
-            // CLOSE EDIT MODAL
             else if (action === 'close-edit-modal') {
                 document.getElementById('edit-event-modal').classList.add('hidden');
             }
-            // SUBMIT EDIT
             else if (action === 'submit-edit-race') {
                 const id = document.getElementById('edit-ev-id').value;
                 const name = document.getElementById('edit-ev-name').value.trim();
@@ -724,6 +720,13 @@
                 if (confirm("Are you sure you want to completely delete this event? This cannot be undone.")) {
                     const raceId = target.getAttribute('data-id');
                     await saveDB('delete_race', { id: raceId });
+                }
+            }
+            // NEW: Delete Broadcast Functionality
+            else if (action === 'delete-news') {
+                if (confirm("Are you sure you want to completely delete this broadcast?")) {
+                    const postId = target.getAttribute('data-id');
+                    await saveDB('delete_news', { id: postId });
                 }
             }
             else if (action === 'rsvp') {
@@ -862,7 +865,6 @@
                     return;
                 }
 
-                // Compile Crew List for RSVPs
                 let vesselCrew = db.users.filter(u => u && (u.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
 
                 vesselRaces.forEach(race => {
@@ -887,7 +889,6 @@
                         if(race.startTime) detailsHTML += `<span class="mr-3">⏰ Start: ${race.startTime}</span>`;
                         if(race.finishTime) detailsHTML += `<span class="mr-3">🏁 Finish: ${race.finishTime} ${race.finishDate ? '('+race.finishDate+')' : ''}</span>`;
 
-                        // DYNAMIC RSVP LIST
                         let rsvpListHTML = `<div class="mt-4 pt-4 border-t border-slate-100 hidden" id="rsvp-list-${race.id}"><h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Crew Status</h5><div class="grid grid-cols-2 sm:grid-cols-3 gap-2">`;
                         vesselCrew.forEach(crew => {
                             const status = race.rsvps[crew.username];
@@ -1007,12 +1008,17 @@
                 vesselNews.forEach(post => {
                     if(!post) return;
                     const node = document.createElement('div');
-                    node.className = "bg-white p-5 rounded-3xl shadow-sm border border-slate-200 space-y-3";
+                    node.className = "bg-white p-5 rounded-3xl shadow-sm border border-slate-200 space-y-3 relative";
                     
                     let imgHTML = post.image ? `<img src="${post.image}" class="w-full rounded-2xl object-cover max-h-80 border border-slate-100 mt-3">` : '';
                     
+                    let adminControls = '';
+                    if (currentUser.role === 'admin' || currentUser.role === 'captain') {
+                        adminControls = `<button data-action="delete-news" data-id="${post.id}" class="absolute top-5 right-5 text-[10px] font-bold text-rose-500 hover:text-rose-700 transition">🗑️ Delete</button>`;
+                    }
+
                     node.innerHTML = `
-                        <div class="flex justify-between items-center mb-2">
+                        <div class="flex justify-between items-center mb-2 pr-16">
                             <div class="flex items-center space-x-2">
                                 <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/></svg>
@@ -1023,6 +1029,7 @@
                         </div>
                         <p class="text-sm text-slate-600 leading-relaxed">${post.text || ''}</p>
                         ${imgHTML}
+                        ${adminControls}
                     `;
                     container.appendChild(node);
                 });
