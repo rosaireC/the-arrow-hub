@@ -55,9 +55,18 @@
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Password</label>
                         <input type="password" id="auth-password" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition" placeholder="••••••••">
                     </div>
+                    
+                    <!-- KEEP ME LOGGED IN OPTION -->
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" id="auth-remember" class="rounded text-indigo-600 w-4 h-4 cursor-pointer accent-indigo-600">
+                            <span class="text-sm font-semibold text-slate-600">Keep me logged in</span>
+                        </label>
+                    </div>
+
                     <div id="auth-error" class="text-rose-500 text-sm hidden font-medium text-center bg-rose-50 p-2 rounded-lg border border-rose-100"></div>
                     
-                    <div class="flex gap-3 pt-4">
+                    <div class="flex gap-3 pt-2">
                         <button type="button" data-action="submit-login" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3.5 rounded-xl transition shadow-md cursor-pointer text-sm">Login</button>
                         <button type="button" data-action="submit-register" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3.5 rounded-xl transition shadow-md cursor-pointer text-sm">Register</button>
                     </div>
@@ -247,23 +256,54 @@
         let db = { users: [], races: [], news: [] };
         let currentUser = null;
 
-        // 🚨 CRITICAL FIX: The Cache Buster
-        // Adding ?t=... ensures the browser never loads stale data from memory.
-        async function init() {
+        // 🚨 COLD START FIX: Smart retry loop for the database
+        async function init(retries = 3) {
             try {
                 const res = await fetch('/api/data?t=' + new Date().getTime(), { 
                     cache: 'no-store',
                     headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
                 });
                 const fetchedDb = await res.json();
+                
+                // If DB comes back totally empty, the backend is likely still waking up. Wait 1s and retry.
+                if (fetchedDb && fetchedDb.users && fetchedDb.users.length === 0 && retries > 0) {
+                    await new Promise(r => setTimeout(r, 1000));
+                    return await init(retries - 1);
+                }
+
                 if (fetchedDb && fetchedDb.users) {
                     db = fetchedDb;
+                    if (!db.races) db.races = [];
+                    if (!db.news) db.news = [];
                 }
-            } catch (e) { console.warn("Failed to load from server"); }
+            } catch (e) { 
+                if (retries > 0) {
+                    await new Promise(r => setTimeout(r, 1000));
+                    return await init(retries - 1);
+                }
+            }
         }
-        init();
 
-        // Strict UI verification for database saves
+        // AUTO-LOGIN LOGIC
+        window.onload = async () => {
+            await init();
+            const savedCreds = localStorage.getItem('captainsLogCreds');
+            if (savedCreds) {
+                try {
+                    const creds = JSON.parse(savedCreds);
+                    document.getElementById('auth-vessel').value = creds.vessel || '';
+                    document.getElementById('auth-username').value = creds.username || '';
+                    document.getElementById('auth-password').value = creds.password || '';
+                    document.getElementById('auth-remember').checked = true;
+                    
+                    // Trigger the login sequence automatically
+                    if (creds.vessel && creds.username && creds.password) {
+                        document.querySelector('[data-action="submit-login"]').click();
+                    }
+                } catch(e) { localStorage.removeItem('captainsLogCreds'); }
+            }
+        };
+
         async function saveDB(mutationType, mutationData) {
             try {
                 const res = await fetch('/api/save', {
@@ -348,55 +388,57 @@
             const action = target.getAttribute('data-action');
 
             if (action === 'submit-register') {
+                const btn = target; btn.textContent = "Connecting..."; btn.disabled = true;
                 await init(); 
+                
                 const vessel = document.getElementById('auth-vessel').value.trim();
                 const user = document.getElementById('auth-username').value.trim();
                 const pass = document.getElementById('auth-password').value.trim();
                 const errBox = document.getElementById('auth-error');
+                const remember = document.getElementById('auth-remember').checked;
                 
                 if(!vessel || !user || !pass) {
-                    errBox.textContent = "All fields are required.";
-                    errBox.classList.remove('hidden');
-                    return;
+                    errBox.textContent = "All fields are required."; errBox.classList.remove('hidden');
+                    btn.textContent = "Register"; btn.disabled = false; return;
                 }
                 
                 const exists = db.users.find(u => (u.vessel || '').toLowerCase() === vessel.toLowerCase() && (u.username || '').toLowerCase() === user.toLowerCase());
                 if(exists) {
-                    errBox.textContent = "Username already exists on this vessel. Try logging in.";
-                    errBox.classList.remove('hidden');
-                    return;
+                    errBox.textContent = "Username already exists on this vessel. Try logging in."; errBox.classList.remove('hidden');
+                    btn.textContent = "Register"; btn.disabled = false; return;
                 }
                 
                 const existingVesselCrew = db.users.filter(u => (u.vessel || '').toLowerCase() === vessel.toLowerCase());
-                
                 let userRole = existingVesselCrew.length === 0 ? 'admin' : 'crew';
 
-                if (user.toLowerCase() === 'rosaire') {
-                    userRole = 'admin';
-                }
+                if (user.toLowerCase() === 'rosaire') { userRole = 'admin'; }
 
                 const newUser = {
-                    vessel: vessel,
-                    username: user,
-                    password: pass,
-                    role: userRole,
-                    isAdmin: (userRole === 'admin' || userRole === 'captain'),
-                    email: '', profilePic: '',
-                    prefs: { email: false }
+                    vessel: vessel, username: user, password: pass,
+                    role: userRole, isAdmin: (userRole === 'admin' || userRole === 'captain'),
+                    email: '', profilePic: '', prefs: { email: false }
                 };
                 
                 const success = await saveDB('add_user', newUser);
                 if (success) {
-                    currentUser = newUser; 
-                    launchDashboard();
+                    if (remember) {
+                        localStorage.setItem('captainsLogCreds', JSON.stringify({ vessel, username: user, password: pass }));
+                    } else {
+                        localStorage.removeItem('captainsLogCreds');
+                    }
+                    currentUser = newUser; launchDashboard();
                 }
+                btn.textContent = "Register"; btn.disabled = false;
             }
             else if (action === 'submit-login') {
+                const btn = target; btn.textContent = "Authenticating..."; btn.disabled = true;
                 await init(); 
+                
                 const vessel = document.getElementById('auth-vessel').value.trim();
                 const user = document.getElementById('auth-username').value.trim();
                 const pass = document.getElementById('auth-password').value.trim();
                 const errBox = document.getElementById('auth-error');
+                const remember = document.getElementById('auth-remember').checked;
                 
                 const match = db.users.find(u => 
                     (u.vessel || '').toLowerCase() === vessel.toLowerCase() && 
@@ -408,21 +450,28 @@
                     if (!match.role) match.role = match.isAdmin ? 'admin' : 'crew';
                     
                     if (match.username.toLowerCase() === 'rosaire' && match.role !== 'admin') {
-                        match.role = 'admin';
-                        match.isAdmin = true;
+                        match.role = 'admin'; match.isAdmin = true;
                         const success = await saveDB('update_settings', match);
-                        if (!success) return; 
+                        if (!success) { btn.textContent = "Login"; btn.disabled = false; return; }
                     }
 
-                    currentUser = match; 
-                    launchDashboard();
+                    if (remember) {
+                        localStorage.setItem('captainsLogCreds', JSON.stringify({ vessel, username: user, password: pass }));
+                    } else {
+                        localStorage.removeItem('captainsLogCreds');
+                    }
+
+                    currentUser = match; launchDashboard();
                 } else {
                     errBox.textContent = "Credential Rejected. Check Vessel name and password.";
                     errBox.classList.remove('hidden');
                 }
+                btn.textContent = "Login"; btn.disabled = false;
             }
             else if (action === 'logout') {
                 currentUser = null;
+                localStorage.removeItem('captainsLogCreds');
+                document.getElementById('auth-remember').checked = false;
                 document.getElementById('dashboard-screen').style.display = 'none';
                 document.getElementById('auth-screen').style.display = 'flex';
                 document.getElementById('auth-password').value = '';
@@ -511,26 +560,17 @@
                 const fileInput = document.getElementById('news-image');
                 let imgBase64 = null;
                 
-                if(fileInput.files.length > 0) {
-                    imgBase64 = await fileToBase64(fileInput.files[0]);
-                }
+                if(fileInput.files.length > 0) { imgBase64 = await fileToBase64(fileInput.files[0]); }
                 
                 if(!text && !imgBase64) return;
 
                 const newPost = {
-                    id: 'news-' + Date.now(),
-                    vessel: currentUser.vessel,
-                    author: currentUser.username,
-                    text: text,
-                    image: imgBase64,
-                    timestamp: new Date().toLocaleString()
+                    id: 'news-' + Date.now(), vessel: currentUser.vessel, author: currentUser.username,
+                    text: text, image: imgBase64, timestamp: new Date().toLocaleString()
                 };
                 
                 const success = await saveDB('post_news', newPost);
-                if (success) {
-                    document.getElementById('news-text').value = '';
-                    fileInput.value = '';
-                }
+                if (success) { document.getElementById('news-text').value = ''; fileInput.value = ''; }
             }
             else if (action === 'save-settings') {
                 const email = document.getElementById('settings-email').value;
@@ -538,23 +578,14 @@
                 const fileInput = document.getElementById('settings-pic-upload');
 
                 let pic = currentUser.profilePic;
-                if (fileInput.files.length > 0) {
-                    pic = await fileToBase64(fileInput.files[0]);
-                }
+                if (fileInput.files.length > 0) { pic = await fileToBase64(fileInput.files[0]); }
 
-                const updatedUser = {
-                    ...currentUser,
-                    email: email,
-                    prefs: { email: prefEmail },
-                    profilePic: pic
-                };
-
+                const updatedUser = { ...currentUser, email: email, prefs: { email: prefEmail }, profilePic: pic };
                 const success = await saveDB('update_settings', updatedUser);
                 if (success) {
                     loadSettingsUI();
                     const notice = document.getElementById('settings-save-notice');
-                    notice.classList.remove('hidden');
-                    setTimeout(() => notice.classList.add('hidden'), 3000);
+                    notice.classList.remove('hidden'); setTimeout(() => notice.classList.add('hidden'), 3000);
                 }
             }
             else if (action === 'admin-add-crew') {
@@ -566,13 +597,8 @@
                 if(exists) return alert("Crew member already exists.");
 
                 const newCrew = {
-                    vessel: currentUser.vessel,
-                    username: uName,
-                    password: uPass,
-                    role: 'crew',
-                    isAdmin: false,
-                    email: '', profilePic: '',
-                    prefs: { email: false }
+                    vessel: currentUser.vessel, username: uName, password: uPass,
+                    role: 'crew', isAdmin: false, email: '', profilePic: '', prefs: { email: false }
                 };
 
                 const success = await saveDB('add_user', newCrew);
@@ -594,14 +620,11 @@
             badge.classList.remove('hidden', 'bg-amber-500', 'text-amber-950', 'bg-blue-500', 'text-white', 'bg-slate-500');
             
             if (currentUser.role === 'admin') {
-                badge.textContent = 'Admin';
-                badge.classList.add('bg-blue-500', 'text-white');
+                badge.textContent = 'Admin'; badge.classList.add('bg-blue-500', 'text-white');
             } else if (currentUser.role === 'captain') {
-                badge.textContent = 'Captain';
-                badge.classList.add('bg-amber-500', 'text-amber-950');
+                badge.textContent = 'Captain'; badge.classList.add('bg-amber-500', 'text-amber-950');
             } else {
-                badge.textContent = 'Crew';
-                badge.classList.add('bg-slate-500', 'text-white');
+                badge.textContent = 'Crew'; badge.classList.add('bg-slate-500', 'text-white');
             }
             
             const hasAdminPowers = currentUser.role === 'admin' || currentUser.role === 'captain';
@@ -616,10 +639,7 @@
                 document.getElementById('admin-crew-creator').classList.add('hidden');
             }
 
-            loadSettingsUI();
-            renderRaces();
-            renderNews();
-            renderCrew();
+            loadSettingsUI(); renderRaces(); renderNews(); renderCrew();
         }
 
         function loadSettingsUI() {
@@ -632,8 +652,7 @@
         }
 
         function renderRaces() {
-            const container = document.getElementById('race-list');
-            container.innerHTML = '';
+            const container = document.getElementById('race-list'); container.innerHTML = '';
             
             let vesselRaces = db.races.filter(r => (r.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
             vesselRaces.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
@@ -677,8 +696,7 @@
         }
 
         function renderCrew() {
-            const container = document.getElementById('crew-list');
-            container.innerHTML = '';
+            const container = document.getElementById('crew-list'); container.innerHTML = '';
 
             let vesselCrew = db.users.filter(u => (u.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
 
@@ -687,16 +705,13 @@
                 const node = document.createElement('div');
                 node.className = "flex items-center justify-between p-4 border border-slate-200 rounded-2xl bg-white shadow-sm";
                 
-                let roleHTML = '';
-                const uRole = crew.role || (crew.isAdmin ? 'admin' : 'crew'); 
+                let roleHTML = ''; const uRole = crew.role || (crew.isAdmin ? 'admin' : 'crew'); 
                 
                 if (uRole === 'admin') roleHTML = '<span class="text-[10px] font-bold text-blue-500 uppercase tracking-wider">Admin</span>';
                 else if (uRole === 'captain') roleHTML = '<span class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Captain</span>';
                 else roleHTML = '<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Crew</span>';
 
-                let adminActionHTML = '';
-                
-                let canEditRole = false;
+                let adminActionHTML = ''; let canEditRole = false;
                 if (currentUser.username !== crew.username) {
                     if (currentUser.role === 'admin') canEditRole = true;
                     if (currentUser.role === 'captain' && uRole !== 'admin') canEditRole = true;
@@ -727,8 +742,7 @@
         }
 
         function renderNews() {
-            const container = document.getElementById('news-feed-container');
-            container.innerHTML = '';
+            const container = document.getElementById('news-feed-container'); container.innerHTML = '';
 
             let vesselNews = db.news.filter(n => (n.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
 
