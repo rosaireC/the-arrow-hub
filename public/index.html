@@ -97,3 +97,104 @@
                 <button data-action="nav-tab" data-target="panel-news" class="nav-btn flex-1 min-w-[120px] py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:bg-slate-50 transition cursor-pointer">News Feed</button>
                 <button data-action="nav-tab" data-target="panel-settings" class="nav-btn flex-1 min-w-[120px] py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:bg-slate-50 transition cursor-pointer">My Gear</button>
             </div>
+
+            <div id="panel-races" class="nav-panel space-y-6">
+                
+                <div id="admin-race-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 flex items-center">
+                        <span class="bg-indigo-100 text-indigo-600 p-1.5 rounded-lg mr-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/></svg>
+                        </span>
+                        Draft New Event
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Race/Event Name *</label>
+                            <input type="text" id="ev-name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm" placeholder="e.g., Summer Regatta">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Location</label>
+                            <input type="text" id="ev-location" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm" placeholder="e.g., Royal Yacht Club">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Start Date *</label>
+                            <input type="date" id="ev-date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Start Time</label>
+                            <input type="time" id="ev-start-time" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Finish Date</label>
+                            <input type="date" id="ev-finish-date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Finish Time</label>
+                            <input type="time" id="ev-finish-time" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Crew Capacity</label>
+                            <input type="number" id="ev-spaces" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm" placeholder="10">
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Event Notes</label>
+                            <input type="text" id="ev-notes" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm" placeholder="Any special instructions or gear required?">
+                        </div>
+                        
+                        <div class="md:col-span-4 bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" id="ev-recurring" class="rounded text-indigo-600 w-5 h-5 cursor-pointer accent-indigo-600">
+                                <span class="text-sm font-bold text-slate-700">Repeat this event weekly</span>
+                            </label>
+                            <div id="recurring-options" class="hidden flex items-center space-x-3">
+                                <span class="text-xs font-bold text-slate-500">Until</span>
+                                <input type="date" id="ev-until-date" class="p-2 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-500 cursor-pointer">
+                            </div>
+                            <button data-action="create-race" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold py-3 px-8 rounded-xl cursor-pointer shadow-md transition ml-auto">Log Event(s)</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 border-b border-slate-100 pb-3">Upcoming Events</h3>
+                    <div id="race-list" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <div id="panel-crew" style="display: none;" class="nav-panel space-y-6">
+                <div id="admin-crew-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 flex items-center">
+                        <span class="bg-emerald-100 text-emerald-600 p-1.5 rounded-lg mr-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/></svg>
+                        </span>
+                        Manually Enlist Crew
+                    </h3>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <input type="text" id="new-crew-user" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 text-sm" placeholder="New Username">
+                        </div>
+                        <div class="flex-1">
+                            <input type="text" id="new-crew-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 text-sm" placeholder="Temporary Password">
+                        </div>
+                        <button data-action="admin-add-crew" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold py-3 px-8 rounded-xl cursor-pointer shadow-md transition">Add to Roster</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 border-b border-slate-100 pb-3">Active Roster</h3>
+                    <div id="crew-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+
+            <div id="panel-news" style="display: none;" class="nav-panel space-y-6">
+                <div id="admin-news-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center">
+                        <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg mr-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/></svg>
+                        </span>
+                        Broadcast to Crew
+                    </h3>
+                    <textarea id="news-text" rows="3" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm transition" placeholder="What's the plan, Command?"></textarea>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <input type="file" id="news-image" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
