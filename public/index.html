@@ -247,10 +247,18 @@
         let db = { users: [], races: [], news: [] };
         let currentUser = null;
 
+        // 🚨 CRITICAL FIX: The Cache Buster
+        // Adding ?t=... ensures the browser never loads stale data from memory.
         async function init() {
             try {
-                const res = await fetch('/api/data');
-                db = await res.json();
+                const res = await fetch('/api/data?t=' + new Date().getTime(), { 
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                });
+                const fetchedDb = await res.json();
+                if (fetchedDb && fetchedDb.users) {
+                    db = fetchedDb;
+                }
             } catch (e) { console.warn("Failed to load from server"); }
         }
         init();
