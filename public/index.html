@@ -298,11 +298,21 @@
             }
         };
 
+        // FIX: Properly handle lists of events vs single updates to stop the MongoDB "docs must be an array" error
         async function saveDB(mutationType, mutationData) {
-            // FIX: Strip out the immutable MongoDB ID to prevent save crashes during user updates
-            let payloadData = { ...mutationData };
-            if (payloadData._id) {
+            let payloadData;
+            
+            if (Array.isArray(mutationData)) {
+                payloadData = mutationData.map(item => {
+                    const cleanItem = { ...item };
+                    delete cleanItem._id;
+                    return cleanItem;
+                });
+            } else if (typeof mutationData === 'object' && mutationData !== null) {
+                payloadData = { ...mutationData };
                 delete payloadData._id;
+            } else {
+                payloadData = mutationData;
             }
 
             try {
@@ -552,7 +562,6 @@
                             currentFinishDateStr = fDate.toISOString().split('T')[0];
                         }
 
-                        // FIX: Cleaned up naming - removed the 'Week X' text string entirely
                         raceArray.push({
                             id: 'race-' + Date.now() + '-' + i,
                             vessel: currentUser.vessel,
