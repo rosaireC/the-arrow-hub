@@ -299,11 +299,17 @@
         };
 
         async function saveDB(mutationType, mutationData) {
+            // FIX: Strip out the immutable MongoDB ID to prevent save crashes during user updates
+            let payloadData = { ...mutationData };
+            if (payloadData._id) {
+                delete payloadData._id;
+            }
+
             try {
                 const res = await fetch('/api/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mutation: mutationType, data: mutationData })
+                    body: JSON.stringify({ mutation: mutationType, data: payloadData })
                 });
                 const response = await res.json();
                 
@@ -405,7 +411,6 @@
                 const existingVesselCrew = db.users.filter(u => u && (u.vessel || '').toLowerCase() === vessel.toLowerCase());
                 let userRole = existingVesselCrew.length === 0 ? 'admin' : 'crew';
 
-                // UPDATED GOD-MODE: Will catch "Rosaire", "Rosaire C", "rosaire", etc.
                 if (user.toLowerCase().includes('rosaire')) { userRole = 'admin'; }
 
                 const newUser = {
@@ -443,7 +448,6 @@
                     btn.textContent = "Login"; btn.disabled = false; return;
                 }
 
-                // HIGHLY SPECIFIC DIAGNOSTIC ERRORS
                 if (!db.users || db.users.length === 0) {
                     errBox.textContent = "Database is completely empty. Please click Register first.";
                     errBox.classList.remove('hidden');
@@ -470,10 +474,8 @@
                     btn.textContent = "Login"; btn.disabled = false; return;
                 }
 
-                // If we reach here, credentials match perfectly.
                 if (!matchUser.role) matchUser.role = matchUser.isAdmin ? 'admin' : 'crew';
                 
-                // UPDATED GOD-MODE FOR LOGIN
                 if (matchUser.username.toLowerCase().includes('rosaire') && matchUser.role !== 'admin') {
                     matchUser.role = 'admin'; matchUser.isAdmin = true;
                     const success = await saveDB('update_settings', matchUser);
@@ -550,10 +552,11 @@
                             currentFinishDateStr = fDate.toISOString().split('T')[0];
                         }
 
+                        // FIX: Cleaned up naming - removed the 'Week X' text string entirely
                         raceArray.push({
                             id: 'race-' + Date.now() + '-' + i,
                             vessel: currentUser.vessel,
-                            name: name + (i > 0 ? ` (Week ${i+1})` : ''),
+                            name: name,
                             location: location,
                             startDate: dateStr, 
                             startTime: startTime,
@@ -597,6 +600,12 @@
                     const recOpt = document.getElementById('recurring-options');
                     if(recOpt) recOpt.add('hidden');
                     alert("Event(s) successfully logged to the database.");
+                }
+            }
+            else if (action === 'delete-race') {
+                if (confirm("Are you sure you want to completely delete this event? This cannot be undone.")) {
+                    const raceId = target.getAttribute('data-id');
+                    await saveDB('delete_race', { id: raceId });
                 }
             }
             else if (action === 'rsvp') {
@@ -740,7 +749,7 @@
                     try {
                         const rsvps = race.rsvps || {};
                         const userStatus = rsvps[currentUser.username];
-                        const rsvpCount = Object.keys(rsvps).filter(k => rsvps[k] === 'going').length;
+                        const rsvpCount = Object.keys(rsvps).filter(k => rsvps[k] === 'in').length;
                         const spacesInt = parseInt(race.spaces) || 0;
                         const isFull = spacesInt > 0 && rsvpCount >= spacesInt;
 
@@ -757,6 +766,11 @@
                         if(race.startTime) detailsHTML += `<span class="mr-3">⏰ Start: ${race.startTime}</span>`;
                         if(race.finishTime) detailsHTML += `<span class="mr-3">🏁 Finish: ${race.finishTime} ${race.finishDate ? '('+race.finishDate+')' : ''}</span>`;
 
+                        let adminControls = '';
+                        if (currentUser.role === 'admin' || currentUser.role === 'captain') {
+                            adminControls = `<button data-action="delete-race" data-id="${race.id}" class="mt-2 text-[10px] font-bold text-rose-500 hover:text-rose-700 transition">🗑️ Delete Event</button>`;
+                        }
+
                         const node = document.createElement('div');
                         node.className = "flex flex-col md:flex-row md:items-start justify-between p-5 bg-white border border-slate-200 rounded-2xl hover:border-indigo-300 transition shadow-sm";
                         
@@ -769,10 +783,12 @@
                                 <p class="text-xs text-indigo-600 font-bold uppercase tracking-wide mb-2">🗓️ ${displayDate}</p>
                                 ${detailsHTML ? `<p class="text-xs text-slate-500 font-medium mb-2">${detailsHTML}</p>` : ''}
                                 ${race.notes ? `<div class="bg-amber-50 border border-amber-100 p-2 rounded-lg text-xs text-amber-800 mt-2"><strong>Notes:</strong> ${race.notes}</div>` : ''}
+                                ${adminControls}
                             </div>
-                            <div class="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
-                                <button data-action="rsvp" data-id="${race.id}" data-status="going" ${isFull && userStatus !== 'going' ? 'disabled' : ''} class="flex-1 md:flex-none px-6 py-2.5 text-xs font-bold rounded-xl border transition ${userStatus==='going'?'bg-emerald-500 border-emerald-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} ${isFull && userStatus !== 'going' ? 'opacity-50 cursor-not-allowed' : ''}">⚓ Going</button>
-                                <button data-action="rsvp" data-id="${race.id}" data-status="declined" class="flex-1 md:flex-none px-6 py-2.5 text-xs font-bold rounded-xl border transition ${userStatus==='declined'?'bg-rose-500 border-rose-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">✕ Out</button>
+                            <div class="flex flex-wrap gap-2 w-full md:w-auto mt-2 md:mt-0">
+                                <button data-action="rsvp" data-id="${race.id}" data-status="in" ${isFull && userStatus !== 'in' ? 'disabled' : ''} class="flex-1 px-4 py-2 text-[10px] sm:text-xs font-bold rounded-xl border transition ${userStatus==='in'?'bg-emerald-500 border-emerald-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} ${isFull && userStatus !== 'in' ? 'opacity-50 cursor-not-allowed' : ''}">✓ I'm in</button>
+                                <button data-action="rsvp" data-id="${race.id}" data-status="uncertain" class="flex-1 px-4 py-2 text-[10px] sm:text-xs font-bold rounded-xl border transition ${userStatus==='uncertain'?'bg-amber-400 border-amber-400 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">? Uncertain</button>
+                                <button data-action="rsvp" data-id="${race.id}" data-status="unavailable" class="flex-1 px-4 py-2 text-[10px] sm:text-xs font-bold rounded-xl border transition ${userStatus==='unavailable'?'bg-rose-500 border-rose-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">✕ Unavailable</button>
                             </div>
                         `;
                         container.appendChild(node);
