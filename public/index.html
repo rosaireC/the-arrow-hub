@@ -151,16 +151,15 @@
                             <input type="text" id="ev-notes" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm" placeholder="Any special instructions or gear required?">
                         </div>
                         
-                        <!-- RECURRING LOGIC -->
+                        <!-- UPDATED RECURRING LOGIC (Until Date) -->
                         <div class="md:col-span-4 bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <label class="flex items-center space-x-3 cursor-pointer">
                                 <input type="checkbox" id="ev-recurring" class="rounded text-indigo-600 w-5 h-5 cursor-pointer accent-indigo-600">
                                 <span class="text-sm font-bold text-slate-700">Repeat this event weekly</span>
                             </label>
                             <div id="recurring-options" class="hidden flex items-center space-x-3">
-                                <span class="text-xs font-bold text-slate-500">For</span>
-                                <input type="number" id="ev-weeks" class="w-20 p-2 border border-slate-200 rounded-lg text-sm text-center outline-none focus:border-indigo-500" value="4" min="2" max="12">
-                                <span class="text-xs font-bold text-slate-500">weeks</span>
+                                <span class="text-xs font-bold text-slate-500">Until</span>
+                                <input type="date" id="ev-until-date" class="p-2 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-500 cursor-pointer">
                             </div>
                             <button data-action="create-race" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold py-3 px-8 rounded-xl cursor-pointer shadow-md transition ml-auto">Log Event(s)</button>
                         </div>
@@ -175,7 +174,6 @@
 
             <!-- PANEL: CREW ROSTER -->
             <div id="panel-crew" style="display: none;" class="nav-panel space-y-6">
-                <!-- Admin Add Crew -->
                 <div id="admin-crew-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                     <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 flex items-center">
                         <span class="bg-emerald-100 text-emerald-600 p-1.5 rounded-lg mr-2">
@@ -221,7 +219,6 @@
             <!-- PANEL: SETTINGS -->
             <div id="panel-settings" style="display: none;" class="nav-panel space-y-6">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-8">
-                    
                     <div>
                         <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 border-b border-slate-100 pb-3">Profile & Identification</h3>
                         <div class="flex items-center space-x-6">
@@ -232,7 +229,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div>
                         <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 border-b border-slate-100 pb-3">Communication Setup</h3>
                         <div class="space-y-4 max-w-md">
@@ -242,7 +238,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="pt-4 border-t border-slate-100 flex items-center">
                         <button data-action="save-settings" class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-8 rounded-xl text-sm cursor-pointer shadow-md transition">Save Gear Settings</button>
                         <span id="settings-save-notice" class="text-emerald-600 text-sm font-bold ml-4 hidden flex items-center"><span class="mr-1">✓</span> Saved successfully</span>
@@ -256,7 +251,7 @@
         let db = { users: [], races: [], news: [] };
         let currentUser = null;
 
-        // 🚨 COLD START FIX: Smart retry loop for the database
+        // Smart retry loop to handle Render's server sleep/wake cycle
         async function init(retries = 3) {
             try {
                 const res = await fetch('/api/data?t=' + new Date().getTime(), { 
@@ -265,7 +260,6 @@
                 });
                 const fetchedDb = await res.json();
                 
-                // If DB comes back totally empty, the backend is likely still waking up. Wait 1s and retry.
                 if (fetchedDb && fetchedDb.users && fetchedDb.users.length === 0 && retries > 0) {
                     await new Promise(r => setTimeout(r, 1000));
                     return await init(retries - 1);
@@ -284,7 +278,6 @@
             }
         }
 
-        // AUTO-LOGIN LOGIC
         window.onload = async () => {
             await init();
             const savedCreds = localStorage.getItem('captainsLogCreds');
@@ -296,7 +289,6 @@
                     document.getElementById('auth-password').value = creds.password || '';
                     document.getElementById('auth-remember').checked = true;
                     
-                    // Trigger the login sequence automatically
                     if (creds.vessel && creds.username && creds.password) {
                         document.querySelector('[data-action="submit-login"]').click();
                     }
@@ -311,12 +303,10 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ mutation: mutationType, data: mutationData })
                 });
-                
                 const response = await res.json();
                 
                 if (response.status === 'success' && response.db) {
                     db = response.db; 
-                    
                     if (currentUser) {
                         const updatedMe = db.users.find(u => u.username === currentUser.username && u.vessel === currentUser.vessel);
                         if (updatedMe) currentUser = updatedMe;
@@ -498,19 +488,34 @@
                 const spaces = document.getElementById('ev-spaces').value || 10;
                 
                 const isRecurring = document.getElementById('ev-recurring').checked;
-                const weeks = parseInt(document.getElementById('ev-weeks').value) || 1;
+                const untilDateStr = document.getElementById('ev-until-date').value;
                 
                 if(!name || !date) return alert("Race Name and Start Date are required.");
                 
                 let baseDate = new Date(date + 'T12:00:00'); 
                 let success = false;
                 
-                if (isRecurring && weeks > 1) {
+                if (isRecurring) {
+                    if(!untilDateStr) return alert("Please select an 'Until' date to stop the recurring event.");
+                    
+                    let untilDate = new Date(untilDateStr + 'T23:59:59');
+                    if (untilDate < baseDate) return alert("The 'Until' date must be after the Start Date.");
+
                     let raceArray = [];
-                    for(let i = 0; i < weeks; i++) {
-                        let nextDate = new Date(baseDate.getTime() + (i * 7 * 24 * 60 * 60 * 1000));
-                        let dateStr = nextDate.toISOString().split('T')[0];
+                    let currentDate = new Date(baseDate.getTime());
+                    let i = 0;
+                    
+                    // Loop until the specific date is reached (Max 52 weeks as a safety stop)
+                    while (currentDate <= untilDate && i < 52) {
+                        let dateStr = currentDate.toISOString().split('T')[0];
                         
+                        let currentFinishDateStr = finishDate;
+                        if (finishDate) {
+                            let fDate = new Date(finishDate + 'T12:00:00');
+                            fDate.setDate(fDate.getDate() + (i * 7));
+                            currentFinishDateStr = fDate.toISOString().split('T')[0];
+                        }
+
                         raceArray.push({
                             id: 'race-' + Date.now() + '-' + i,
                             vessel: currentUser.vessel,
@@ -518,14 +523,19 @@
                             location: location,
                             startDate: dateStr, 
                             startTime: startTime,
-                            finishDate: finishDate,
+                            finishDate: currentFinishDateStr,
                             finishTime: finishTime,
                             notes: notes,
                             spaces: parseInt(spaces),
                             rsvps: {}
                         });
+                        
+                        currentDate.setDate(currentDate.getDate() + 7);
+                        i++;
                     }
-                    success = await saveDB('add_multiple_races', raceArray);
+                    if(raceArray.length > 0) {
+                        success = await saveDB('add_multiple_races', raceArray);
+                    }
                 } else {
                     const newRace = {
                         id: 'race-' + Date.now(),
@@ -544,7 +554,7 @@
                 }
                 
                 if (success) {
-                    ['ev-name', 'ev-location', 'ev-date', 'ev-start-time', 'ev-finish-date', 'ev-finish-time', 'ev-notes'].forEach(id => document.getElementById(id).value = '');
+                    ['ev-name', 'ev-location', 'ev-date', 'ev-start-time', 'ev-finish-date', 'ev-finish-time', 'ev-notes', 'ev-until-date'].forEach(id => document.getElementById(id).value = '');
                     document.getElementById('ev-recurring').checked = false;
                     document.getElementById('recurring-options').classList.add('hidden');
                     alert("Event(s) successfully logged to the database.");
@@ -652,125 +662,162 @@
         }
 
         function renderRaces() {
-            const container = document.getElementById('race-list'); container.innerHTML = '';
-            
-            let vesselRaces = db.races.filter(r => (r.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
-            vesselRaces.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-            
-            if (vesselRaces.length === 0) {
-                container.innerHTML = `<div class="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300"><p class="text-sm text-slate-400 font-medium">No events scheduled for this vessel.</p></div>`; 
-                return;
-            }
-
-            vesselRaces.forEach(race => {
-                const rsvps = race.rsvps || {};
-                const userStatus = rsvps[currentUser.username];
-                const rsvpCount = Object.keys(rsvps).filter(k => rsvps[k] === 'going').length;
-                const isFull = rsvpCount >= race.spaces;
-
-                let detailsHTML = '';
-                if(race.location) detailsHTML += `<span class="mr-3">📍 ${race.location}</span>`;
-                if(race.startTime) detailsHTML += `<span class="mr-3">⏰ Start: ${race.startTime}</span>`;
-                if(race.finishTime) detailsHTML += `<span class="mr-3">🏁 Finish: ${race.finishTime} ${race.finishDate ? '('+race.finishDate+')' : ''}</span>`;
-
-                const node = document.createElement('div');
-                node.className = "flex flex-col md:flex-row md:items-start justify-between p-5 bg-white border border-slate-200 rounded-2xl hover:border-indigo-300 transition shadow-sm";
+            try {
+                const container = document.getElementById('race-list'); 
+                if(!container) return;
+                container.innerHTML = '';
                 
-                node.innerHTML = `
-                    <div class="mb-4 md:mb-0 w-full md:w-2/3">
-                        <div class="flex items-center space-x-3 mb-1">
-                            <h4 class="font-bold text-base text-slate-900">${race.name}</h4>
-                            <span class="text-[10px] font-extrabold px-2 py-1 rounded bg-slate-100 text-slate-600 tracking-wide">${rsvpCount} / ${race.spaces} RSVP</span>
-                        </div>
-                        <p class="text-xs text-indigo-600 font-bold uppercase tracking-wide mb-2">🗓️ ${new Date(race.startDate + 'T12:00:00').toLocaleDateString(undefined, {weekday: 'short', month: 'short', day: 'numeric'})}</p>
-                        ${detailsHTML ? `<p class="text-xs text-slate-500 font-medium mb-2">${detailsHTML}</p>` : ''}
-                        ${race.notes ? `<div class="bg-amber-50 border border-amber-100 p-2 rounded-lg text-xs text-amber-800 mt-2"><strong>Notes:</strong> ${race.notes}</div>` : ''}
-                    </div>
-                    <div class="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
-                        <button data-action="rsvp" data-id="${race.id}" data-status="going" ${isFull && userStatus !== 'going' ? 'disabled' : ''} class="flex-1 md:flex-none px-6 py-2.5 text-xs font-bold rounded-xl border transition ${userStatus==='going'?'bg-emerald-500 border-emerald-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} ${isFull && userStatus !== 'going' ? 'opacity-50 cursor-not-allowed' : ''}">⚓ Going</button>
-                        <button data-action="rsvp" data-id="${race.id}" data-status="declined" class="flex-1 md:flex-none px-6 py-2.5 text-xs font-bold rounded-xl border transition ${userStatus==='declined'?'bg-rose-500 border-rose-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">✕ Out</button>
-                    </div>
-                `;
-                container.appendChild(node);
-            });
+                if (!db.races || !Array.isArray(db.races)) {
+                    container.innerHTML = `<p class="text-xs text-rose-500 p-4">Error accessing database records.</p>`;
+                    return;
+                }
+
+                let vesselRaces = db.races.filter(r => (r.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
+                
+                // Safe date sorting
+                vesselRaces.sort((a, b) => {
+                    const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+                    const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+                    return dateA - dateB;
+                });
+                
+                if (vesselRaces.length === 0) {
+                    container.innerHTML = `<div class="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300"><p class="text-sm text-slate-400 font-medium">No events scheduled for this vessel.</p></div>`; 
+                    return;
+                }
+
+                vesselRaces.forEach(race => {
+                    try {
+                        const rsvps = race.rsvps || {};
+                        const userStatus = rsvps[currentUser.username];
+                        const rsvpCount = Object.keys(rsvps).filter(k => rsvps[k] === 'going').length;
+                        const spacesInt = parseInt(race.spaces) || 0;
+                        const isFull = spacesInt > 0 && rsvpCount >= spacesInt;
+
+                        // Safe date rendering to prevent script crashes from corrupted database rows
+                        let displayDate = "TBD";
+                        if (race.startDate) {
+                            const parsedDate = new Date(race.startDate + 'T12:00:00');
+                            if (!isNaN(parsedDate)) {
+                                displayDate = parsedDate.toLocaleDateString(undefined, {weekday: 'short', month: 'short', day: 'numeric'});
+                            }
+                        }
+
+                        let detailsHTML = '';
+                        if(race.location) detailsHTML += `<span class="mr-3">📍 ${race.location}</span>`;
+                        if(race.startTime) detailsHTML += `<span class="mr-3">⏰ Start: ${race.startTime}</span>`;
+                        if(race.finishTime) detailsHTML += `<span class="mr-3">🏁 Finish: ${race.finishTime} ${race.finishDate ? '('+race.finishDate+')' : ''}</span>`;
+
+                        const node = document.createElement('div');
+                        node.className = "flex flex-col md:flex-row md:items-start justify-between p-5 bg-white border border-slate-200 rounded-2xl hover:border-indigo-300 transition shadow-sm";
+                        
+                        node.innerHTML = `
+                            <div class="mb-4 md:mb-0 w-full md:w-2/3">
+                                <div class="flex items-center space-x-3 mb-1">
+                                    <h4 class="font-bold text-base text-slate-900">${race.name || 'Unnamed Event'}</h4>
+                                    <span class="text-[10px] font-extrabold px-2 py-1 rounded bg-slate-100 text-slate-600 tracking-wide">${rsvpCount} ${spacesInt > 0 ? '/ ' + spacesInt : ''} RSVP</span>
+                                </div>
+                                <p class="text-xs text-indigo-600 font-bold uppercase tracking-wide mb-2">🗓️ ${displayDate}</p>
+                                ${detailsHTML ? `<p class="text-xs text-slate-500 font-medium mb-2">${detailsHTML}</p>` : ''}
+                                ${race.notes ? `<div class="bg-amber-50 border border-amber-100 p-2 rounded-lg text-xs text-amber-800 mt-2"><strong>Notes:</strong> ${race.notes}</div>` : ''}
+                            </div>
+                            <div class="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
+                                <button data-action="rsvp" data-id="${race.id}" data-status="going" ${isFull && userStatus !== 'going' ? 'disabled' : ''} class="flex-1 md:flex-none px-6 py-2.5 text-xs font-bold rounded-xl border transition ${userStatus==='going'?'bg-emerald-500 border-emerald-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} ${isFull && userStatus !== 'going' ? 'opacity-50 cursor-not-allowed' : ''}">⚓ Going</button>
+                                <button data-action="rsvp" data-id="${race.id}" data-status="declined" class="flex-1 md:flex-none px-6 py-2.5 text-xs font-bold rounded-xl border transition ${userStatus==='declined'?'bg-rose-500 border-rose-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">✕ Out</button>
+                            </div>
+                        `;
+                        container.appendChild(node);
+                    } catch (err) { console.warn("Skipping corrupted event format", err); }
+                });
+            } catch (fatalErr) {
+                console.error("Fatal Error rendering races:", fatalErr);
+            }
         }
 
         function renderCrew() {
-            const container = document.getElementById('crew-list'); container.innerHTML = '';
+            try {
+                const container = document.getElementById('crew-list'); 
+                if(!container) return;
+                container.innerHTML = '';
 
-            let vesselCrew = db.users.filter(u => (u.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
+                let vesselCrew = db.users.filter(u => (u.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
 
-            vesselCrew.forEach(crew => {
-                const avatar = crew.profilePic || `https://ui-avatars.com/api/?name=${crew.username}&background=f1f5f9&color=64748b&bold=true`;
-                const node = document.createElement('div');
-                node.className = "flex items-center justify-between p-4 border border-slate-200 rounded-2xl bg-white shadow-sm";
-                
-                let roleHTML = ''; const uRole = crew.role || (crew.isAdmin ? 'admin' : 'crew'); 
-                
-                if (uRole === 'admin') roleHTML = '<span class="text-[10px] font-bold text-blue-500 uppercase tracking-wider">Admin</span>';
-                else if (uRole === 'captain') roleHTML = '<span class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Captain</span>';
-                else roleHTML = '<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Crew</span>';
+                vesselCrew.forEach(crew => {
+                    const avatar = crew.profilePic || `https://ui-avatars.com/api/?name=${crew.username}&background=f1f5f9&color=64748b&bold=true`;
+                    const node = document.createElement('div');
+                    node.className = "flex items-center justify-between p-4 border border-slate-200 rounded-2xl bg-white shadow-sm";
+                    
+                    let roleHTML = ''; const uRole = crew.role || (crew.isAdmin ? 'admin' : 'crew'); 
+                    
+                    if (uRole === 'admin') roleHTML = '<span class="text-[10px] font-bold text-blue-500 uppercase tracking-wider">Admin</span>';
+                    else if (uRole === 'captain') roleHTML = '<span class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Captain</span>';
+                    else roleHTML = '<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Crew</span>';
 
-                let adminActionHTML = ''; let canEditRole = false;
-                if (currentUser.username !== crew.username) {
-                    if (currentUser.role === 'admin') canEditRole = true;
-                    if (currentUser.role === 'captain' && uRole !== 'admin') canEditRole = true;
-                }
+                    let adminActionHTML = ''; let canEditRole = false;
+                    if (currentUser.username !== crew.username) {
+                        if (currentUser.role === 'admin') canEditRole = true;
+                        if (currentUser.role === 'captain' && uRole !== 'admin') canEditRole = true;
+                    }
 
-                if (canEditRole) {
-                    adminActionHTML = `
-                        <select data-user="${crew.username}" class="role-selector text-xs font-bold border border-slate-200 rounded-lg p-1.5 outline-none focus:border-indigo-500 bg-slate-50 cursor-pointer">
-                            <option value="crew" ${uRole === 'crew' ? 'selected' : ''}>Crew</option>
-                            <option value="captain" ${uRole === 'captain' ? 'selected' : ''}>Captain</option>
-                            <option value="admin" ${uRole === 'admin' ? 'selected' : ''}>Admin</option>
-                        </select>
-                    `;
-                }
+                    if (canEditRole) {
+                        adminActionHTML = `
+                            <select data-user="${crew.username}" class="role-selector text-xs font-bold border border-slate-200 rounded-lg p-1.5 outline-none focus:border-indigo-500 bg-slate-50 cursor-pointer">
+                                <option value="crew" ${uRole === 'crew' ? 'selected' : ''}>Crew</option>
+                                <option value="captain" ${uRole === 'captain' ? 'selected' : ''}>Captain</option>
+                                <option value="admin" ${uRole === 'admin' ? 'selected' : ''}>Admin</option>
+                            </select>
+                        `;
+                    }
 
-                node.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <img src="${avatar}" class="w-10 h-10 rounded-full border border-slate-200 object-cover">
-                        <div>
-                            <p class="font-bold text-sm text-slate-900">${crew.username} ${crew.username === currentUser.username ? '<span class="text-indigo-500">(You)</span>' : ''}</p>
-                            ${roleHTML}
+                    node.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <img src="${avatar}" class="w-10 h-10 rounded-full border border-slate-200 object-cover">
+                            <div>
+                                <p class="font-bold text-sm text-slate-900">${crew.username} ${crew.username === currentUser.username ? '<span class="text-indigo-500">(You)</span>' : ''}</p>
+                                ${roleHTML}
+                            </div>
                         </div>
-                    </div>
-                    ${adminActionHTML}
-                `;
-                container.appendChild(node);
-            });
+                        ${adminActionHTML}
+                    `;
+                    container.appendChild(node);
+                });
+            } catch(e) { console.error("Error rendering crew:", e); }
         }
 
         function renderNews() {
-            const container = document.getElementById('news-feed-container'); container.innerHTML = '';
+            try {
+                const container = document.getElementById('news-feed-container'); 
+                if(!container) return;
+                container.innerHTML = '';
 
-            let vesselNews = db.news.filter(n => (n.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
+                let vesselNews = db.news.filter(n => (n.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
 
-            if (vesselNews.length === 0) {
-                container.innerHTML = `<div class="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300"><p class="text-sm text-slate-400 font-medium">No updates from Command.</p></div>`; return;
-            }
+                if (vesselNews.length === 0) {
+                    container.innerHTML = `<div class="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300"><p class="text-sm text-slate-400 font-medium">No updates from Command.</p></div>`; return;
+                }
 
-            vesselNews.forEach(post => {
-                const node = document.createElement('div');
-                node.className = "bg-white p-5 rounded-3xl shadow-sm border border-slate-200 space-y-3";
-                
-                let imgHTML = post.image ? `<img src="${post.image}" class="w-full rounded-2xl object-cover max-h-80 border border-slate-100 mt-3">` : '';
-                
-                node.innerHTML = `
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/></svg>
+                vesselNews.forEach(post => {
+                    const node = document.createElement('div');
+                    node.className = "bg-white p-5 rounded-3xl shadow-sm border border-slate-200 space-y-3";
+                    
+                    let imgHTML = post.image ? `<img src="${post.image}" class="w-full rounded-2xl object-cover max-h-80 border border-slate-100 mt-3">` : '';
+                    
+                    node.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/></svg>
+                                </div>
+                                <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">${post.author}</span>
                             </div>
-                            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">${post.author}</span>
+                            <span class="text-[10px] font-medium text-slate-400">${post.timestamp}</span>
                         </div>
-                        <span class="text-[10px] font-medium text-slate-400">${post.timestamp}</span>
-                    </div>
-                    <p class="text-sm text-slate-600 leading-relaxed">${post.text}</p>
-                    ${imgHTML}
-                `;
-                container.appendChild(node);
-            });
+                        <p class="text-sm text-slate-600 leading-relaxed">${post.text}</p>
+                        ${imgHTML}
+                    `;
+                    container.appendChild(node);
+                });
+            } catch(e) { console.error("Error rendering news:", e); }
         }
     </script>
 </body>
