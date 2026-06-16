@@ -1,79 +1,113 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
+const { MongoClient } = require('mongodb');
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_FILE = path.join(__dirname, 'db.json');
 
-app.use(express.json());
+// Increase payload limits for base64 image uploads
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Baseline Database Presets
-const defaultData = {
-  users: [
-    { email: "rosaire@torontoadventures.ca", username: "rosaire", password: "july1988", isAdmin: true },
-    { email: "crew1@arrow.com", username: "alex", password: "password123", isAdmin: false }
-  ],
-  races: [
-    {
-      id: "race-1",
-      name: "Lake Ontario Summer Opener",
-      startDate: "2026-06-20",
-      startTime: "08:00",
-      endDate: "2026-06-22",
-      endTime: "17:00",
-      startLoc: "Toronto Harbour",
-      endLoc: "Niagara-on-the-Lake",
-      spaces: 10,
-      notes: "High speed downwind leg anticipated. Bring drysuits.",
-      rsvps: { "alex": "going" }
-    }
-  ]
-};
+// MONGODB CONNECTION SETUP
+const uri = process.env.MONGO_URI; 
+const client = new MongoClient(uri);
+let db;
 
-// Database Initialization Safety Check
-function readDatabase() {
-  if (!fs.existsSync(DB_FILE)) {
-    fs.writeFileSync(DB_FILE, JSON.stringify(defaultData, null, 2));
-    return defaultData;
-  }
+async function connectDB() {
   try {
-    const raw = fs.readFileSync(DB_FILE);
-    return JSON.parse(raw);
-  } catch (e) {
-    return defaultData;
+    if (!uri) throw new Error("MONGO_URI environment variable is missing!");
+    await client.connect();
+    db = client.db('captains_log'); // This will automatically create the database
+    console.log('⚓ Connection to MongoDB Mainframe established.');
+  } catch (err) {
+    console.error('Database connection failed:', err);
   }
 }
+connectDB();
 
-function writeDatabase(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+// HELPER: Fetch the entire fleet state
+async function getFullDB() {
+  // Pulls fresh data from the 3 distinct database collections
+  const users = await db.collection('users').find({}).toArray();
+  const races = await db.collection('races').find({}).toArray();
+  const news = await db.collection('news').find({}).sort({ _id: -1 }).toArray(); // Sorts newest first
+  return { users, races, news };
 }
 
-// REST API ENDPOINTS
-app.get('/api/data', (req, res) => {
-  res.json(readDatabase());
+// REST ENDPOINTS
+app.get('/api/data', async (req, res) => {
+  try {
+    const fullData = await getFullDB();
+    res.json(fullData);
+  } catch (err) {
+    res.status(500).json({ users: [], races: [], news: [] });
+  }
 });
 
-app.post('/api/save', (req, res) => {
+app.post('/api/save', async (req, res) => {
   try {
-    const incomingData = req.body;
-    const currentDb = readDatabase();
+    const { mutation, data } = req.body;
     
-    if (incomingData.users) currentDb.users = incomingData.users;
-    if (incomingData.races) currentDb.races = incomingData.races;
+    // SMART DATABASE MUTATIONS
+    if (mutation === 'add_user') {
+        await db.collection('users').insertOne(data);
+        
+    } else if (mutation === 'add_race') {
+        await db.collection('races').insertOne(data);
+        
+    } else if (mutation === 'rsvp') {
+        // True Atomic Update: Targets the exact race and injects only this user's RSVP
+        const updatePath = `rsvps.${data.username}`;
+        await db.collection('races').updateOne(
+            { id: data.raceId },
+            { $set: { [updatePath]: data.status } }
+        );
+        
+    } else if (mutation === 'post_news') {
+        await db.collection('news').insertOne(data);
+        
+    } else if (mutation === 'update_settings') {
+        // Targets the specific user and completely updates their profile
+        await db.collection('users').updateOne(
+            { username: data.username, vessel: data.vessel },
+            { $set: data }
+        );
+    }
     
-    writeDatabase(currentDb);
-    res.json({ status: 'success' });
+    // Instantly return the freshly combined Database state to the client
+    const freshDb = await getFullDB();
+    res.json({ status: 'success', db: freshDb });
+    
   } catch (err) {
+    console.error(err);
     res.status(500).json({ status: 'error', message: err.toString() });
   }
 });
 
-// Fallback Route redirects to Frontend interface 
+// SIMULATED AUTOMATED REMINDER ENGINE
+setInterval(async () => {
+  if (!db) return; // Wait until DB is connected
+  
+  const today = new Date().toISOString().split('T')[0];
+  const todaysRaces = await db.collection('races').find({ startDate: today }).toArray();
+  
+  for (const race of todaysRaces) {
+    // Find all users who belong to the vessel racing today
+    const vesselCrew = await db.collection('users').find({ vessel: { $regex: new RegExp(`^${race.vessel}$`, 'i') } }).toArray();
+    
+    vesselCrew.forEach(crew => {
+      const status = race.rsvps ? race.rsvps[crew.username] : null;
+      if (crew.prefs && crew.prefs.email) {
+        console.log(`[EMAIL SIMULATION] To: ${crew.email} | Subject: Race Today! | Message: Ahoy ${crew.username}, don't forget the ${race.name} today. Current RSVP: ${status || 'None'}`);
+      }
+    });
+  }
+}, 60000); 
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(PORT, () => {
-  console.log(`The Arrow Tactical Engine running smoothly on port ${PORT}`);
+  console.log(`Captain's Log Server Engine active on port ${PORT}`);
 });
