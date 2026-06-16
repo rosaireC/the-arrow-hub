@@ -13,6 +13,7 @@
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
 
+    <!-- SPLASH SCREEN -->
     <div id="splash-screen" class="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center z-50 transition-opacity duration-700">
         <div class="text-center animate-fade-in px-4">
             <svg class="w-32 h-32 mx-auto mb-6 text-indigo-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8m0 0V3m0 10h.01M5.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-18 0V12a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 12v4.5m-18 0v-2.25A2.25 2.25 0 015.25 9.75h13.5A2.25 2.25 0 0121 12v2.25m-18 0v-4.5"></path></svg>
@@ -22,127 +23,139 @@
         </div>
     </div>
 
-    <div id="auth-screen" class="hidden flex-grow flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-            <div class="p-8 text-center bg-slate-50 border-b border-slate-100">
-                <h2 class="heading-font text-2xl font-bold text-slate-900">Vessel Access</h2>
-                <p class="text-xs text-slate-500 mt-1">Enter your assigned vessel and credentials</p>
-            </div>
-            <div class="p-8 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Vessel Name</label>
-                    <input type="text" id="auth-vessel" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g., Black Magic">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Crew Username</label>
-                    <input type="text" id="auth-username" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="Username">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Password</label>
-                    <input type="password" id="auth-password" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="••••••••">
-                </div>
-                <div id="auth-error" class="text-rose-500 text-sm hidden font-medium text-center"></div>
-                
-                <div class="flex gap-2 pt-2">
-                    <button type="button" data-action="submit-login" class="w-1/2 bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-lg transition shadow-md cursor-pointer text-sm">Login</button>
-                    <button type="button" data-action="submit-register" class="w-1/2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition shadow-md cursor-pointer text-sm">Register</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="dashboard-screen" class="hidden flex-col flex-grow max-w-5xl mx-auto w-full p-4 md:p-8 space-y-6">
+    <!-- MAIN APP CONTAINER -->
+    <main class="flex-grow flex flex-col items-center w-full">
         
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-slate-900 text-white p-6 rounded-2xl shadow-lg">
-            <div class="flex items-center space-x-4 mb-4 sm:mb-0">
-                <img id="header-profile-pic" src="https://ui-avatars.com/api/?name=Crew&background=4f46e5&color=fff" class="w-12 h-12 rounded-full border-2 border-indigo-500 object-cover">
-                <div>
-                    <h2 class="heading-font text-2xl font-bold tracking-tight">S/V <span id="display-vessel" class="text-indigo-400">Vessel</span></h2>
-                    <p class="text-slate-400 text-sm">Crew: <span id="display-username" class="font-medium text-white">Name</span> <span id="admin-badge" class="hidden bg-amber-500/20 text-amber-400 text-[10px] px-1.5 py-0.5 rounded ml-1 font-bold uppercase">Captain</span></p>
+        <!-- AUTH SCREEN -->
+        <div id="auth-screen" style="display: none;" class="flex-grow flex items-center justify-center p-4 w-full">
+            <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+                <div class="p-8 text-center bg-slate-50 border-b border-slate-100">
+                    <h2 class="heading-font text-2xl font-bold text-slate-900">Vessel Access</h2>
+                    <p class="text-xs text-slate-500 mt-1">Enter your assigned vessel and credentials</p>
+                </div>
+                <div class="p-8 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Vessel Name</label>
+                        <input type="text" id="auth-vessel" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g., Black Magic">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Crew Username</label>
+                        <input type="text" id="auth-username" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="Username">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Password</label>
+                        <input type="password" id="auth-password" class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="••••••••">
+                    </div>
+                    <div id="auth-error" class="text-rose-500 text-sm hidden font-medium text-center"></div>
+                    
+                    <div class="flex gap-2 pt-2">
+                        <button type="button" data-action="submit-login" class="w-1/2 bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-lg transition shadow-md cursor-pointer text-sm">Login</button>
+                        <button type="button" data-action="submit-register" class="w-1/2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition shadow-md cursor-pointer text-sm">Register</button>
+                    </div>
                 </div>
             </div>
-            <button data-action="logout" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 px-4 rounded-lg text-sm border border-slate-700 cursor-pointer">Disembark</button>
         </div>
 
-        <div class="flex space-x-2 bg-white p-1 rounded-xl shadow-sm border border-slate-200">
-            <button data-action="nav-tab" data-target="panel-races" class="nav-btn flex-1 py-2 text-sm font-bold rounded-lg bg-indigo-50 text-indigo-700 cursor-pointer">Racing Schedule</button>
-            <button data-action="nav-tab" data-target="panel-news" class="nav-btn flex-1 py-2 text-sm font-bold rounded-lg text-slate-500 hover:bg-slate-50 cursor-pointer">News Feed</button>
-            <button data-action="nav-tab" data-target="panel-settings" class="nav-btn flex-1 py-2 text-sm font-bold rounded-lg text-slate-500 hover:bg-slate-50 cursor-pointer">My Gear & Settings</button>
-        </div>
-
-        <div id="panel-races" class="nav-panel space-y-6">
-            <div id="admin-race-creator" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Draft New Event</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 mb-1">Race Name</label><input type="text" id="ev-name" class="w-full p-2 border border-slate-200 rounded outline-none focus:border-indigo-500 text-sm"></div>
-                    <div><label class="block text-xs font-bold text-slate-500 mb-1">Start Date</label><input type="date" id="ev-date" class="w-full p-2 border border-slate-200 rounded outline-none text-sm"></div>
-                    <div><label class="block text-xs font-bold text-slate-500 mb-1">Spaces</label><input type="number" id="ev-spaces" class="w-full p-2 border border-slate-200 rounded outline-none text-sm" placeholder="10"></div>
-                    <div class="md:col-span-4 flex justify-end"><button data-action="create-race" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold py-2 px-6 rounded cursor-pointer">Log Race</button></div>
-                </div>
-            </div>
+        <!-- DASHBOARD -->
+        <div id="dashboard-screen" style="display: none;" class="flex-col flex-grow max-w-5xl mx-auto w-full p-4 md:p-8 space-y-6">
             
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Fleet Manifest</h3>
-                <div id="race-list" class="space-y-3"></div>
-            </div>
-        </div>
-
-        <div id="panel-news" class="nav-panel hidden space-y-6">
-            <div id="admin-news-creator" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">Broadcast to Crew</h3>
-                <textarea id="news-text" rows="3" class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm" placeholder="What's the plan, Captain?"></textarea>
-                <div class="flex items-center justify-between">
-                    <input type="file" id="news-image" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                    <button data-action="post-news" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg text-sm cursor-pointer shadow-sm">Post Broadcast</button>
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-slate-900 text-white p-6 rounded-2xl shadow-lg">
+                <div class="flex items-center space-x-4 mb-4 sm:mb-0">
+                    <img id="header-profile-pic" src="https://ui-avatars.com/api/?name=Crew&background=4f46e5&color=fff" class="w-12 h-12 rounded-full border-2 border-indigo-500 object-cover">
+                    <div>
+                        <h2 class="heading-font text-2xl font-bold tracking-tight">S/V <span id="display-vessel" class="text-indigo-400">Vessel</span></h2>
+                        <p class="text-slate-400 text-sm">Crew: <span id="display-username" class="font-medium text-white">Name</span> <span id="admin-badge" class="hidden bg-amber-500/20 text-amber-400 text-[10px] px-1.5 py-0.5 rounded ml-1 font-bold uppercase">Captain</span></p>
+                    </div>
                 </div>
+                <button data-action="logout" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 px-4 rounded-lg text-sm border border-slate-700 cursor-pointer">Disembark</button>
             </div>
-            <div id="news-feed-container" class="space-y-4"></div>
-        </div>
 
-        <div id="panel-settings" class="nav-panel hidden space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+            <!-- Navigation Tabs -->
+            <div class="flex space-x-2 bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+                <button data-action="nav-tab" data-target="panel-races" class="nav-btn flex-1 py-2 text-sm font-bold rounded-lg bg-indigo-50 text-indigo-700 cursor-pointer">Racing Schedule</button>
+                <button data-action="nav-tab" data-target="panel-news" class="nav-btn flex-1 py-2 text-sm font-bold rounded-lg text-slate-500 hover:bg-slate-50 cursor-pointer">News Feed</button>
+                <button data-action="nav-tab" data-target="panel-settings" class="nav-btn flex-1 py-2 text-sm font-bold rounded-lg text-slate-500 hover:bg-slate-50 cursor-pointer">My Gear & Settings</button>
+            </div>
+
+            <!-- PANEL: RACES -->
+            <div id="panel-races" class="nav-panel space-y-6">
+                <!-- Admin Add Race -->
+                <div id="admin-race-creator" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Draft New Event</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 mb-1">Race Name</label><input type="text" id="ev-name" class="w-full p-2 border border-slate-200 rounded outline-none focus:border-indigo-500 text-sm"></div>
+                        <div><label class="block text-xs font-bold text-slate-500 mb-1">Start Date</label><input type="date" id="ev-date" class="w-full p-2 border border-slate-200 rounded outline-none text-sm"></div>
+                        <div><label class="block text-xs font-bold text-slate-500 mb-1">Spaces</label><input type="number" id="ev-spaces" class="w-full p-2 border border-slate-200 rounded outline-none text-sm" placeholder="10"></div>
+                        <div class="md:col-span-4 flex justify-end"><button data-action="create-race" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold py-2 px-6 rounded cursor-pointer">Log Race</button></div>
+                    </div>
+                </div>
                 
-                <div>
-                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Profile & Identification</h3>
-                    <div class="flex items-center space-x-6">
-                        <img id="settings-pic-preview" src="" class="w-20 h-20 rounded-full bg-slate-100 border border-slate-200 object-cover">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">Upload Photo</label>
-                            <input type="file" id="settings-pic-upload" accept="image/*" class="text-xs text-slate-500 mb-2">
-                        </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Fleet Manifest</h3>
+                    <div id="race-list" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- PANEL: NEWS FEED -->
+            <div id="panel-news" style="display: none;" class="nav-panel space-y-6">
+                <div id="admin-news-creator" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">Broadcast to Crew</h3>
+                    <textarea id="news-text" rows="3" class="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm" placeholder="What's the plan, Captain?"></textarea>
+                    <div class="flex items-center justify-between">
+                        <input type="file" id="news-image" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                        <button data-action="post-news" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg text-sm cursor-pointer shadow-sm">Post Broadcast</button>
                     </div>
                 </div>
+                <div id="news-feed-container" class="space-y-4"></div>
+            </div>
 
-                <div>
-                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Automated Notifications</h3>
-                    <div class="space-y-3 max-w-sm">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">Email Address</label>
-                            <input type="email" id="settings-email" class="w-full p-2 border border-slate-200 rounded outline-none text-sm" placeholder="crew@email.com">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">Phone Number (SMS)</label>
-                            <input type="tel" id="settings-phone" class="w-full p-2 border border-slate-200 rounded outline-none text-sm" placeholder="555-123-4567">
-                        </div>
-                        <div class="pt-2 space-y-2">
-                            <label class="flex items-center space-x-2 cursor-pointer">
-                                <input type="checkbox" id="pref-email" class="rounded text-indigo-600 w-4 h-4 cursor-pointer">
-                                <span class="text-sm font-semibold text-slate-700">Receive Email Reminders</span>
-                            </label>
-                            <label class="flex items-center space-x-2 cursor-pointer">
-                                <input type="checkbox" id="pref-sms" class="rounded text-indigo-600 w-4 h-4 cursor-pointer">
-                                <span class="text-sm font-semibold text-slate-700">Receive Text (SMS) Reminders</span>
-                            </label>
+            <!-- PANEL: SETTINGS -->
+            <div id="panel-settings" style="display: none;" class="nav-panel space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Profile & Identification</h3>
+                        <div class="flex items-center space-x-6">
+                            <img id="settings-pic-preview" src="" class="w-20 h-20 rounded-full bg-slate-100 border border-slate-200 object-cover">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Upload Photo</label>
+                                <input type="file" id="settings-pic-upload" accept="image/*" class="text-xs text-slate-500 mb-2">
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="pt-4 border-t border-slate-100">
-                    <button data-action="save-settings" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg text-sm cursor-pointer shadow">Save Settings</button>
-                    <span id="settings-save-notice" class="text-emerald-600 text-xs font-bold ml-3 hidden">Settings Saved!</span>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Automated Notifications</h3>
+                        <div class="space-y-3 max-w-sm">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Email Address</label>
+                                <input type="email" id="settings-email" class="w-full p-2 border border-slate-200 rounded outline-none text-sm" placeholder="crew@email.com">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Phone Number (SMS)</label>
+                                <input type="tel" id="settings-phone" class="w-full p-2 border border-slate-200 rounded outline-none text-sm" placeholder="555-123-4567">
+                            </div>
+                            <div class="pt-2 space-y-2">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" id="pref-email" class="rounded text-indigo-600 w-4 h-4 cursor-pointer">
+                                    <span class="text-sm font-semibold text-slate-700">Receive Email Reminders</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" id="pref-sms" class="rounded text-indigo-600 w-4 h-4 cursor-pointer">
+                                    <span class="text-sm font-semibold text-slate-700">Receive Text (SMS) Reminders</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100">
+                        <button data-action="save-settings" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg text-sm cursor-pointer shadow">Save Settings</button>
+                        <span id="settings-save-notice" class="text-emerald-600 text-xs font-bold ml-3 hidden">Settings Saved!</span>
+                    </div>
                 </div>
             </div>
         </div>
+    </main>
 
     <script>
         let db = { users: [], races: [], news: [] };
@@ -198,3 +211,220 @@
             const target = e.target.closest('[data-action]');
             if (!target) return;
             const action = target.getAttribute('data-action');
+
+            if (action === 'dismiss-splash') {
+                // Hard-coded DOM styling override
+                document.getElementById('splash-screen').style.display = 'none';
+                document.getElementById('auth-screen').style.display = 'flex';
+            }
+            else if (action === 'submit-register') {
+                const vessel = document.getElementById('auth-vessel').value.trim();
+                const user = document.getElementById('auth-username').value.trim();
+                const pass = document.getElementById('auth-password').value;
+                
+                if(!vessel || !user || !pass) return alert("Fill all fields.");
+                
+                const existingVesselCrew = db.users.filter(u => u.vessel.toLowerCase() === vessel.toLowerCase());
+                const isAdmin = existingVesselCrew.length === 0;
+
+                const newUser = {
+                    vessel: vessel,
+                    username: user,
+                    password: pass,
+                    isAdmin: isAdmin,
+                    email: '', phone: '', profilePic: '',
+                    prefs: { email: false, sms: false }
+                };
+                
+                currentUser = newUser; 
+                await saveDB('add_user', newUser);
+                launchDashboard();
+            }
+            else if (action === 'submit-login') {
+                const vessel = document.getElementById('auth-vessel').value.trim();
+                const user = document.getElementById('auth-username').value.trim();
+                const pass = document.getElementById('auth-password').value;
+                
+                const match = db.users.find(u => u.vessel.toLowerCase() === vessel.toLowerCase() && u.username.toLowerCase() === user.toLowerCase() && u.password === pass);
+                if (match) {
+                    currentUser = match; launchDashboard();
+                } else {
+                    document.getElementById('auth-error').textContent = "Credentials rejected. Check vessel name and password.";
+                    document.getElementById('auth-error').classList.remove('hidden');
+                }
+            }
+            else if (action === 'logout') {
+                currentUser = null;
+                document.getElementById('dashboard-screen').style.display = 'none';
+                document.getElementById('auth-screen').style.display = 'flex';
+            }
+            else if (action === 'nav-tab') {
+                document.querySelectorAll('.nav-panel').forEach(p => p.style.display = 'none');
+                document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('bg-indigo-50', 'text-indigo-700'); b.classList.add('text-slate-500'); });
+                document.getElementById(target.getAttribute('data-target')).style.display = 'block';
+                target.classList.remove('text-slate-500'); target.classList.add('bg-indigo-50', 'text-indigo-700');
+            }
+            else if (action === 'create-race') {
+                const name = document.getElementById('ev-name').value;
+                const date = document.getElementById('ev-date').value;
+                const spaces = document.getElementById('ev-spaces').value || 10;
+                if(!name || !date) return;
+                
+                const newRace = {
+                    id: 'race-' + Date.now(),
+                    vessel: currentUser.vessel,
+                    name, startDate: date, spaces: parseInt(spaces),
+                    rsvps: {}
+                };
+                
+                await saveDB('add_race', newRace);
+                document.getElementById('ev-name').value = '';
+                document.getElementById('ev-date').value = '';
+            }
+            else if (action === 'rsvp') {
+                const raceId = target.getAttribute('data-id');
+                const status = target.getAttribute('data-status');
+                await saveDB('rsvp', { raceId, username: currentUser.username, status });
+            }
+            else if (action === 'post-news') {
+                const text = document.getElementById('news-text').value;
+                const fileInput = document.getElementById('news-image');
+                let imgBase64 = null;
+                
+                if(fileInput.files.length > 0) {
+                    imgBase64 = await fileToBase64(fileInput.files[0]);
+                }
+                
+                if(!text && !imgBase64) return;
+
+                const newPost = {
+                    id: 'news-' + Date.now(),
+                    vessel: currentUser.vessel,
+                    author: currentUser.username,
+                    text: text,
+                    image: imgBase64,
+                    timestamp: new Date().toLocaleString()
+                };
+                
+                await saveDB('post_news', newPost);
+                
+                document.getElementById('news-text').value = '';
+                fileInput.value = '';
+            }
+            else if (action === 'save-settings') {
+                const email = document.getElementById('settings-email').value;
+                const phone = document.getElementById('settings-phone').value;
+                const prefEmail = document.getElementById('pref-email').checked;
+                const prefSms = document.getElementById('pref-sms').checked;
+                const fileInput = document.getElementById('settings-pic-upload');
+
+                let pic = currentUser.profilePic;
+                if (fileInput.files.length > 0) {
+                    pic = await fileToBase64(fileInput.files[0]);
+                }
+
+                const updatedUser = {
+                    ...currentUser,
+                    email: email, phone: phone,
+                    prefs: { email: prefEmail, sms: prefSms },
+                    profilePic: pic
+                };
+
+                await saveDB('update_settings', updatedUser);
+                loadSettingsUI();
+                
+                const notice = document.getElementById('settings-save-notice');
+                notice.classList.remove('hidden');
+                setTimeout(() => notice.classList.add('hidden'), 3000);
+            }
+        });
+
+        function launchDashboard() {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('dashboard-screen').style.display = 'flex';
+            document.getElementById('display-vessel').textContent = currentUser.vessel;
+            document.getElementById('display-username').textContent = currentUser.username;
+            
+            if(currentUser.isAdmin) {
+                document.getElementById('admin-badge').classList.remove('hidden');
+                document.getElementById('admin-race-creator').classList.remove('hidden');
+                document.getElementById('admin-news-creator').classList.remove('hidden');
+            }
+
+            loadSettingsUI();
+            renderRaces();
+            renderNews();
+        }
+
+        function loadSettingsUI() {
+            document.getElementById('settings-email').value = currentUser.email || '';
+            document.getElementById('settings-phone').value = currentUser.phone || '';
+            document.getElementById('pref-email').checked = currentUser.prefs?.email || false;
+            document.getElementById('pref-sms').checked = currentUser.prefs?.sms || false;
+            
+            const avatarUrl = currentUser.profilePic || `https://ui-avatars.com/api/?name=${currentUser.username}&background=4f46e5&color=fff`;
+            document.getElementById('settings-pic-preview').src = avatarUrl;
+            document.getElementById('header-profile-pic').src = avatarUrl;
+        }
+
+        function renderRaces() {
+            const container = document.getElementById('race-list');
+            container.innerHTML = '';
+            
+            let vesselRaces = db.races.filter(r => r.vessel.toLowerCase() === currentUser.vessel.toLowerCase());
+            
+            if (vesselRaces.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic">No events scheduled for this vessel.</p>`; return;
+            }
+
+            vesselRaces.forEach(race => {
+                const userStatus = race.rsvps ? race.rsvps[currentUser.username] : null;
+                const node = document.createElement('div');
+                node.className = "border border-slate-200 rounded-xl p-4";
+                node.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-900">${race.name}</h4>
+                            <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wide">${race.startDate}</p>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-indigo-50 text-indigo-700">${Object.keys(race.rsvps || {}).length} / ${race.spaces} RSVP</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button data-action="rsvp" data-id="${race.id}" data-status="going" class="flex-1 py-1.5 text-xs font-bold rounded border ${userStatus==='going'?'bg-emerald-600 border-emerald-600 text-white':'bg-white border-slate-200 text-slate-600'}">⚓ Going</button>
+                        <button data-action="rsvp" data-id="${race.id}" data-status="declined" class="flex-1 py-1.5 text-xs font-bold rounded border ${userStatus==='declined'?'bg-rose-600 border-rose-600 text-white':'bg-white border-slate-200 text-slate-600'}">✕ Out</button>
+                    </div>
+                `;
+                container.appendChild(node);
+            });
+        }
+
+        function renderNews() {
+            const container = document.getElementById('news-feed-container');
+            container.innerHTML = '';
+
+            let vesselNews = db.news.filter(n => n.vessel.toLowerCase() === currentUser.vessel.toLowerCase());
+
+            if (vesselNews.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic">No news posted yet.</p>`; return;
+            }
+
+            vesselNews.forEach(post => {
+                const node = document.createElement('div');
+                node.className = "bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3";
+                
+                let imgHTML = post.image ? `<img src="${post.image}" class="w-full rounded-lg object-cover max-h-64 border border-slate-100">` : '';
+                
+                node.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-indigo-700 uppercase tracking-wider">Captain ${post.author}</span>
+                        <span class="text-[10px] text-slate-400">${post.timestamp}</span>
+                    </div>
+                    <p class="text-sm text-slate-700 leading-relaxed">${post.text}</p>
+                    ${imgHTML}
+                `;
+                container.appendChild(node);
+            });
+        }
+    </script>
+</body>
+</html>
