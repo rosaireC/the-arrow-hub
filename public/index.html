@@ -20,7 +20,6 @@
     <!-- SPLASH SCREEN -->
     <div id="splash-screen" class="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center z-50 transition-opacity duration-700">
         <div class="text-center px-4">
-            <!-- NEW SAILBOAT LOGO -->
             <svg class="w-28 h-28 mx-auto mb-6 text-indigo-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/>
             </svg>
@@ -37,6 +36,9 @@
         <div id="auth-screen" style="display: none;" class="flex-grow flex items-center justify-center p-4 w-full">
             <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
                 <div class="p-8 text-center bg-slate-50 border-b border-slate-100">
+                    <svg class="w-12 h-12 mx-auto mb-4 text-indigo-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/>
+                    </svg>
                     <h2 class="heading-font text-2xl font-extrabold text-slate-900">Vessel Access</h2>
                     <p class="text-xs text-slate-500 mt-2">Enter your assigned vessel and credentials</p>
                 </div>
@@ -71,7 +73,12 @@
                 <div class="flex items-center space-x-5 mb-4 sm:mb-0">
                     <img id="header-profile-pic" src="" class="w-16 h-16 rounded-full border-2 border-indigo-400 shadow-lg object-cover bg-slate-800">
                     <div>
-                        <h2 class="heading-font text-3xl font-extrabold tracking-tight">S/V <span id="display-vessel" class="text-indigo-400">Vessel</span></h2>
+                        <div class="flex items-center mb-1">
+                            <svg class="w-6 h-6 text-indigo-400 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/>
+                            </svg>
+                            <h2 class="heading-font text-3xl font-extrabold tracking-tight">S/V <span id="display-vessel" class="text-indigo-400">Vessel</span></h2>
+                        </div>
                         <div class="flex items-center mt-1">
                             <p class="text-slate-300 text-sm mr-2">Logged in as <span id="display-username" class="font-bold text-white">Name</span></p>
                             <span id="role-badge" class="hidden text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shadow-sm">Role</span>
@@ -94,7 +101,12 @@
                 
                 <!-- Admin Add Race -->
                 <div id="admin-race-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 flex items-center"><span class="bg-indigo-100 text-indigo-600 p-1.5 rounded-lg mr-2">📅</span> Draft New Event</h3>
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 flex items-center">
+                        <span class="bg-indigo-100 text-indigo-600 p-1.5 rounded-lg mr-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/></svg>
+                        </span>
+                        Draft New Event
+                    </h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
                         <div class="md:col-span-2">
@@ -156,7 +168,12 @@
             <div id="panel-crew" style="display: none;" class="nav-panel space-y-6">
                 <!-- Admin Add Crew -->
                 <div id="admin-crew-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 flex items-center"><span class="bg-emerald-100 text-emerald-600 p-1.5 rounded-lg mr-2">⚓</span> Manually Enlist Crew</h3>
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 flex items-center">
+                        <span class="bg-emerald-100 text-emerald-600 p-1.5 rounded-lg mr-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/></svg>
+                        </span>
+                        Manually Enlist Crew
+                    </h3>
                     <div class="flex flex-col sm:flex-row gap-4">
                         <div class="flex-1">
                             <input type="text" id="new-crew-user" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 text-sm" placeholder="New Username">
@@ -177,7 +194,12 @@
             <!-- PANEL: NEWS FEED -->
             <div id="panel-news" style="display: none;" class="nav-panel space-y-6">
                 <div id="admin-news-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-4">
-                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center"><span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg mr-2">📢</span> Broadcast to Crew</h3>
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center">
+                        <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg mr-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/></svg>
+                        </span>
+                        Broadcast to Crew
+                    </h3>
                     <textarea id="news-text" rows="3" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm transition" placeholder="What's the plan, Command?"></textarea>
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <input type="file" id="news-image" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
@@ -233,7 +255,7 @@
         }
         init();
 
-        // 🚨 CRITICAL FIX: The UI will now strictly verify the database save worked before proceeding.
+        // Strict UI verification for database saves
         async function saveDB(mutationType, mutationData) {
             try {
                 const res = await fetch('/api/save', {
@@ -257,12 +279,11 @@
                     }
                     return true;
                 } else {
-                    // This alerts if MongoDB rejects the data
-                    alert("Database Error: " + (response.message || "Failed to save data. Please check Render logs."));
+                    alert("Database Error: " + (response.message || "Failed to save data."));
                     return false;
                 }
             } catch (e) { 
-                alert("Network Error: Could not connect to the database. Ensure MONGO_URI is correct and IP Access is 0.0.0.0/0.");
+                alert("Network Error: Could not connect to the database.");
                 return false;
             }
         }
@@ -356,7 +377,6 @@
                     prefs: { email: false }
                 };
                 
-                // Block the user from logging in locally if the server crashes
                 const success = await saveDB('add_user', newUser);
                 if (success) {
                     currentUser = newUser; 
@@ -717,7 +737,9 @@
                 node.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <div class="flex items-center space-x-2">
-                            <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">C</div>
+                            <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/></svg>
+                            </div>
                             <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">${post.author}</span>
                         </div>
                         <span class="text-[10px] font-medium text-slate-400">${post.timestamp}</span>
