@@ -249,6 +249,54 @@
         </div>
     </main>
 
+    <!-- EDIT EVENT MODAL -->
+    <div id="edit-event-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 w-full max-w-2xl shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h3 class="text-lg font-bold text-slate-800 uppercase tracking-wider mb-5 border-b border-slate-100 pb-3 flex items-center">
+                <span class="bg-indigo-100 text-indigo-600 p-1.5 rounded-lg mr-2">✏️</span> Edit Event Details
+            </h3>
+            <input type="hidden" id="edit-ev-id">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Race/Event Name *</label>
+                    <input type="text" id="edit-ev-name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Location</label>
+                    <input type="text" id="edit-ev-location" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Start Date *</label>
+                    <input type="date" id="edit-ev-date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Start Time</label>
+                    <input type="time" id="edit-ev-start-time" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Finish Date</label>
+                    <input type="date" id="edit-ev-finish-date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Finish Time</label>
+                    <input type="time" id="edit-ev-finish-time" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Crew Capacity</label>
+                    <input type="number" id="edit-ev-spaces" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Event Notes</label>
+                    <input type="text" id="edit-ev-notes" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+                <button data-action="close-edit-modal" class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition">Cancel</button>
+                <button data-action="submit-edit-race" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-xl transition shadow-md">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let db = { users: [], races: [], news: [] };
         let currentUser = null;
@@ -298,7 +346,6 @@
             }
         };
 
-        // FIX: Properly handle lists of events vs single updates to stop the MongoDB "docs must be an array" error
         async function saveDB(mutationType, mutationData) {
             let payloadData;
             
@@ -523,6 +570,68 @@
                 document.getElementById(target.getAttribute('data-target')).style.display = 'block';
                 target.classList.remove('text-slate-500'); 
                 target.classList.add('bg-indigo-50', 'text-indigo-700');
+            }
+            // TOGGLE RSVP VIEW
+            else if (action === 'toggle-rsvps') {
+                const raceId = target.getAttribute('data-id');
+                const listEl = document.getElementById('rsvp-list-' + raceId);
+                if (listEl) {
+                    listEl.classList.toggle('hidden');
+                    if (listEl.classList.contains('hidden')) {
+                        target.innerHTML = '👁️ View Crew RSVPs';
+                    } else {
+                        target.innerHTML = '👁️ Hide Crew RSVPs';
+                    }
+                }
+            }
+            // OPEN EDIT MODAL
+            else if (action === 'open-edit-modal') {
+                const raceId = target.getAttribute('data-id');
+                const race = db.races.find(r => r.id === raceId);
+                if (race) {
+                    document.getElementById('edit-ev-id').value = race.id;
+                    document.getElementById('edit-ev-name').value = race.name || '';
+                    document.getElementById('edit-ev-location').value = race.location || '';
+                    document.getElementById('edit-ev-date').value = race.startDate || '';
+                    document.getElementById('edit-ev-start-time').value = race.startTime || '';
+                    document.getElementById('edit-ev-finish-date').value = race.finishDate || '';
+                    document.getElementById('edit-ev-finish-time').value = race.finishTime || '';
+                    document.getElementById('edit-ev-spaces').value = race.spaces || '';
+                    document.getElementById('edit-ev-notes').value = race.notes || '';
+                    
+                    document.getElementById('edit-event-modal').classList.remove('hidden');
+                }
+            }
+            // CLOSE EDIT MODAL
+            else if (action === 'close-edit-modal') {
+                document.getElementById('edit-event-modal').classList.add('hidden');
+            }
+            // SUBMIT EDIT
+            else if (action === 'submit-edit-race') {
+                const id = document.getElementById('edit-ev-id').value;
+                const name = document.getElementById('edit-ev-name').value.trim();
+                const startDate = document.getElementById('edit-ev-date').value;
+                
+                if(!name || !startDate) return alert("Race Name and Start Date are required.");
+                
+                const updatedRace = {
+                    id: id,
+                    vessel: currentUser.vessel,
+                    name: name,
+                    location: document.getElementById('edit-ev-location').value.trim(),
+                    startDate: startDate,
+                    startTime: document.getElementById('edit-ev-start-time').value,
+                    finishDate: document.getElementById('edit-ev-finish-date').value,
+                    finishTime: document.getElementById('edit-ev-finish-time').value,
+                    notes: document.getElementById('edit-ev-notes').value.trim(),
+                    spaces: parseInt(document.getElementById('edit-ev-spaces').value) || 10,
+                    rsvps: db.races.find(r => r.id === id)?.rsvps || {}
+                };
+
+                const success = await saveDB('edit_race', updatedRace);
+                if (success) {
+                    document.getElementById('edit-event-modal').classList.add('hidden');
+                }
             }
             else if (action === 'create-race') {
                 const name = document.getElementById('ev-name').value.trim();
@@ -753,6 +862,9 @@
                     return;
                 }
 
+                // Compile Crew List for RSVPs
+                let vesselCrew = db.users.filter(u => u && (u.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
+
                 vesselRaces.forEach(race => {
                     if(!race) return;
                     try {
@@ -775,16 +887,34 @@
                         if(race.startTime) detailsHTML += `<span class="mr-3">⏰ Start: ${race.startTime}</span>`;
                         if(race.finishTime) detailsHTML += `<span class="mr-3">🏁 Finish: ${race.finishTime} ${race.finishDate ? '('+race.finishDate+')' : ''}</span>`;
 
+                        // DYNAMIC RSVP LIST
+                        let rsvpListHTML = `<div class="mt-4 pt-4 border-t border-slate-100 hidden" id="rsvp-list-${race.id}"><h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Crew Status</h5><div class="grid grid-cols-2 sm:grid-cols-3 gap-2">`;
+                        vesselCrew.forEach(crew => {
+                            const status = race.rsvps[crew.username];
+                            let statusBadge = '<span class="text-slate-400">Pending</span>';
+                            if (status === 'in') statusBadge = '<span class="text-emerald-500 font-bold">In</span>';
+                            else if (status === 'uncertain') statusBadge = '<span class="text-amber-500 font-bold">Uncertain</span>';
+                            else if (status === 'unavailable') statusBadge = '<span class="text-rose-500 font-bold">Unavailable</span>';
+
+                            rsvpListHTML += `<div class="text-[10px] sm:text-xs"><span class="font-semibold text-slate-700">${crew.username}:</span> ${statusBadge}</div>`;
+                        });
+                        rsvpListHTML += '</div></div>';
+
                         let adminControls = '';
                         if (currentUser.role === 'admin' || currentUser.role === 'captain') {
-                            adminControls = `<button data-action="delete-race" data-id="${race.id}" class="mt-2 text-[10px] font-bold text-rose-500 hover:text-rose-700 transition">🗑️ Delete Event</button>`;
+                            adminControls = `
+                                <div class="mt-3 flex gap-3">
+                                    <button data-action="open-edit-modal" data-id="${race.id}" class="text-[10px] font-bold text-indigo-500 hover:text-indigo-700 transition">✏️ Edit Event</button>
+                                    <button data-action="delete-race" data-id="${race.id}" class="text-[10px] font-bold text-rose-500 hover:text-rose-700 transition">🗑️ Delete Event</button>
+                                </div>
+                            `;
                         }
 
                         const node = document.createElement('div');
                         node.className = "flex flex-col md:flex-row md:items-start justify-between p-5 bg-white border border-slate-200 rounded-2xl hover:border-indigo-300 transition shadow-sm";
                         
                         node.innerHTML = `
-                            <div class="mb-4 md:mb-0 w-full md:w-2/3">
+                            <div class="mb-4 md:mb-0 w-full md:w-2/3 pr-4">
                                 <div class="flex items-center space-x-3 mb-1">
                                     <h4 class="font-bold text-base text-slate-900">${race.name || 'Unnamed Event'}</h4>
                                     <span class="text-[10px] font-extrabold px-2 py-1 rounded bg-slate-100 text-slate-600 tracking-wide">${rsvpCount} ${spacesInt > 0 ? '/ ' + spacesInt : ''} RSVP</span>
@@ -792,12 +922,15 @@
                                 <p class="text-xs text-indigo-600 font-bold uppercase tracking-wide mb-2">🗓️ ${displayDate}</p>
                                 ${detailsHTML ? `<p class="text-xs text-slate-500 font-medium mb-2">${detailsHTML}</p>` : ''}
                                 ${race.notes ? `<div class="bg-amber-50 border border-amber-100 p-2 rounded-lg text-xs text-amber-800 mt-2"><strong>Notes:</strong> ${race.notes}</div>` : ''}
+                                
+                                <button data-action="toggle-rsvps" data-id="${race.id}" class="mt-2 text-[10px] font-bold text-slate-500 hover:text-slate-800 transition">👁️ View Crew RSVPs</button>
+                                ${rsvpListHTML}
                                 ${adminControls}
                             </div>
-                            <div class="flex flex-wrap gap-2 w-full md:w-auto mt-2 md:mt-0">
-                                <button data-action="rsvp" data-id="${race.id}" data-status="in" ${isFull && userStatus !== 'in' ? 'disabled' : ''} class="flex-1 px-4 py-2 text-[10px] sm:text-xs font-bold rounded-xl border transition ${userStatus==='in'?'bg-emerald-500 border-emerald-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} ${isFull && userStatus !== 'in' ? 'opacity-50 cursor-not-allowed' : ''}">✓ I'm in</button>
-                                <button data-action="rsvp" data-id="${race.id}" data-status="uncertain" class="flex-1 px-4 py-2 text-[10px] sm:text-xs font-bold rounded-xl border transition ${userStatus==='uncertain'?'bg-amber-400 border-amber-400 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">? Uncertain</button>
-                                <button data-action="rsvp" data-id="${race.id}" data-status="unavailable" class="flex-1 px-4 py-2 text-[10px] sm:text-xs font-bold rounded-xl border transition ${userStatus==='unavailable'?'bg-rose-500 border-rose-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">✕ Unavailable</button>
+                            <div class="flex flex-wrap gap-2 w-full md:w-auto mt-4 md:mt-0">
+                                <button data-action="rsvp" data-id="${race.id}" data-status="in" ${isFull && userStatus !== 'in' ? 'disabled' : ''} class="flex-1 px-4 py-2.5 text-[10px] sm:text-xs font-bold rounded-xl border transition ${userStatus==='in'?'bg-emerald-500 border-emerald-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} ${isFull && userStatus !== 'in' ? 'opacity-50 cursor-not-allowed' : ''}">✓ I'm in</button>
+                                <button data-action="rsvp" data-id="${race.id}" data-status="uncertain" class="flex-1 px-4 py-2.5 text-[10px] sm:text-xs font-bold rounded-xl border transition ${userStatus==='uncertain'?'bg-amber-400 border-amber-400 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">? Uncertain</button>
+                                <button data-action="rsvp" data-id="${race.id}" data-status="unavailable" class="flex-1 px-4 py-2.5 text-[10px] sm:text-xs font-bold rounded-xl border transition ${userStatus==='unavailable'?'bg-rose-500 border-rose-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">✕ Unavailable</button>
                             </div>
                         `;
                         container.appendChild(node);
