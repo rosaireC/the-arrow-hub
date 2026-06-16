@@ -9,7 +9,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .heading-font { font-family: 'Outfit', sans-serif; }
-        /* Custom scrollbar for a polished look */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -24,7 +23,6 @@
             <svg class="w-28 h-28 mx-auto mb-6 text-indigo-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8m0 0V3m0 10h.01M5.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-18 0V12a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 12v4.5m-18 0v-2.25A2.25 2.25 0 015.25 9.75h13.5A2.25 2.25 0 0121 12v2.25m-18 0v-4.5"></path></svg>
             <h1 class="heading-font text-5xl font-extrabold text-white tracking-wider mb-2 uppercase">Captain's Log</h1>
             <p class="text-indigo-400 text-sm font-medium tracking-widest mb-10 uppercase">Tactical Fleet Management</p>
-            <!-- IRONCLAD ONCLICK ATTRIBUTE ADDED HERE -->
             <button onclick="document.getElementById('splash-screen').style.display='none'; document.getElementById('auth-screen').style.display='flex';" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-12 rounded-full shadow-[0_0_15px_rgba(79,70,229,0.5)] transition-transform transform hover:scale-105 cursor-pointer">BOARD VESSEL</button>
         </div>
     </div>
@@ -73,7 +71,7 @@
                         <h2 class="heading-font text-3xl font-extrabold tracking-tight">S/V <span id="display-vessel" class="text-indigo-400">Vessel</span></h2>
                         <div class="flex items-center mt-1">
                             <p class="text-slate-300 text-sm mr-2">Logged in as <span id="display-username" class="font-bold text-white">Name</span></p>
-                            <span id="admin-badge" class="hidden bg-amber-500 text-amber-950 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shadow-sm">Captain</span>
+                            <span id="role-badge" class="hidden text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shadow-sm">Role</span>
                         </div>
                     </div>
                 </div>
@@ -97,19 +95,39 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
                         <div class="md:col-span-2">
-                            <label class="block text-xs font-bold text-slate-500 mb-1">Race Name</label>
-                            <input type="text" id="ev-name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Race/Event Name *</label>
+                            <input type="text" id="ev-name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm" placeholder="e.g., Summer Regatta">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Location</label>
+                            <input type="text" id="ev-location" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm" placeholder="e.g., Royal Yacht Club">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">Start Date</label>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Start Date *</label>
                             <input type="date" id="ev-date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Start Time</label>
+                            <input type="time" id="ev-start-time" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Finish Date</label>
+                            <input type="date" id="ev-finish-date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Finish Time</label>
+                            <input type="time" id="ev-finish-time" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">Crew Capacity</label>
                             <input type="number" id="ev-spaces" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm" placeholder="10">
                         </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Event Notes</label>
+                            <input type="text" id="ev-notes" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm" placeholder="Any special instructions or gear required?">
+                        </div>
                         
-                        <!-- RECURRING LOGIC RESTORED -->
+                        <!-- RECURRING LOGIC -->
                         <div class="md:col-span-4 bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <label class="flex items-center space-x-3 cursor-pointer">
                                 <input type="checkbox" id="ev-recurring" class="rounded text-indigo-600 w-5 h-5 cursor-pointer accent-indigo-600">
@@ -131,7 +149,7 @@
                 </div>
             </div>
 
-            <!-- PANEL: CREW ROSTER (RESTORED) -->
+            <!-- PANEL: CREW ROSTER -->
             <div id="panel-crew" style="display: none;" class="nav-panel space-y-6">
                 <!-- Admin Add Crew -->
                 <div id="admin-crew-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
@@ -157,7 +175,7 @@
             <div id="panel-news" style="display: none;" class="nav-panel space-y-6">
                 <div id="admin-news-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-4">
                     <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center"><span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg mr-2">📢</span> Broadcast to Crew</h3>
-                    <textarea id="news-text" rows="3" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm transition" placeholder="What's the plan, Captain?"></textarea>
+                    <textarea id="news-text" rows="3" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm transition" placeholder="What's the plan?"></textarea>
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <input type="file" id="news-image" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
                         <button data-action="post-news" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-8 rounded-xl text-sm cursor-pointer shadow-md transition">Post Broadcast</button>
@@ -188,12 +206,6 @@
                                 <label class="block text-xs font-bold text-slate-500 mb-1">Email Address</label>
                                 <input type="email" id="settings-email" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm" placeholder="crew@email.com">
                             </div>
-                            <div class="pt-2">
-                                <label class="flex items-center space-x-3 cursor-pointer bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                    <input type="checkbox" id="pref-email" class="rounded text-indigo-600 w-5 h-5 cursor-pointer accent-indigo-600">
-                                    <span class="text-sm font-bold text-slate-700">Receive Email Reminders</span>
-                                </label>
-                            </div>
                         </div>
                     </div>
 
@@ -210,7 +222,6 @@
         let db = { users: [], races: [], news: [] };
         let currentUser = null;
 
-        // Initialize Data
         async function init() {
             try {
                 const res = await fetch('/api/data');
@@ -219,7 +230,6 @@
         }
         init();
 
-        // Data Mutator
         async function saveDB(mutationType, mutationData) {
             try {
                 const res = await fetch('/api/save', {
@@ -249,7 +259,6 @@
             }
         }
 
-        // Helper
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -259,28 +268,54 @@
             });
         }
 
-        // Event delegation to prevent script crashing if elements haven't rendered
         document.addEventListener('change', function(e) {
             if (e.target.id === 'ev-recurring') {
                 const opts = document.getElementById('recurring-options');
-                if(e.target.checked) {
-                    opts.classList.remove('hidden');
-                } else {
-                    opts.classList.add('hidden');
-                }
+                if(e.target.checked) opts.classList.remove('hidden');
+                else opts.classList.add('hidden');
+            }
+            if (e.target.classList.contains('role-selector')) {
+                const tUser = e.target.getAttribute('data-user');
+                const newRole = e.target.value;
+                changeRole(tUser, newRole);
             }
         });
 
-        // Main Interaction Controller
+        async function changeRole(username, newRole) {
+            if (username === currentUser.username) {
+                alert("You cannot change your own role.");
+                renderCrew(); 
+                return;
+            }
+
+            // Security Check: Captains cannot modify Admin roles
+            const targetUser = db.users.find(u => u.username === username && u.vessel === currentUser.vessel);
+            if (currentUser.role === 'captain' && targetUser && targetUser.role === 'admin') {
+                 alert("Captains do not have clearance to modify Admin roles.");
+                 renderCrew();
+                 return;
+            }
+
+            if(confirm(`Are you sure you want to change ${username} to ${newRole.toUpperCase()}?`)) {
+                if(targetUser) {
+                    const updatedUser = { ...targetUser, role: newRole, isAdmin: (newRole === 'captain' || newRole === 'admin') };
+                    await saveDB('update_settings', updatedUser); 
+                }
+            } else {
+                renderCrew(); 
+            }
+        }
+
         document.addEventListener('click', async function(e) {
             const target = e.target.closest('[data-action]');
             if (!target) return;
             const action = target.getAttribute('data-action');
 
             if (action === 'submit-register') {
+                await init(); 
                 const vessel = document.getElementById('auth-vessel').value.trim();
                 const user = document.getElementById('auth-username').value.trim();
-                const pass = document.getElementById('auth-password').value;
+                const pass = document.getElementById('auth-password').value.trim();
                 const errBox = document.getElementById('auth-error');
                 
                 if(!vessel || !user || !pass) {
@@ -289,21 +324,29 @@
                     return;
                 }
                 
-                const exists = db.users.find(u => u.vessel.toLowerCase() === vessel.toLowerCase() && u.username.toLowerCase() === user.toLowerCase());
+                const exists = db.users.find(u => (u.vessel || '').toLowerCase() === vessel.toLowerCase() && (u.username || '').toLowerCase() === user.toLowerCase());
                 if(exists) {
                     errBox.textContent = "Username already exists on this vessel. Try logging in.";
                     errBox.classList.remove('hidden');
                     return;
                 }
                 
-                const existingVesselCrew = db.users.filter(u => u.vessel.toLowerCase() === vessel.toLowerCase());
-                const isAdmin = existingVesselCrew.length === 0;
+                const existingVesselCrew = db.users.filter(u => (u.vessel || '').toLowerCase() === vessel.toLowerCase());
+                
+                // First person to register becomes Admin
+                let userRole = existingVesselCrew.length === 0 ? 'admin' : 'crew';
+
+                // ROSAIRE GOD-MODE OVERRIDE
+                if (user.toLowerCase() === 'rosaire') {
+                    userRole = 'admin';
+                }
 
                 const newUser = {
                     vessel: vessel,
                     username: user,
                     password: pass,
-                    isAdmin: isAdmin,
+                    role: userRole,
+                    isAdmin: (userRole === 'admin' || userRole === 'captain'),
                     email: '', profilePic: '',
                     prefs: { email: false }
                 };
@@ -313,17 +356,32 @@
                 launchDashboard();
             }
             else if (action === 'submit-login') {
+                await init(); 
                 const vessel = document.getElementById('auth-vessel').value.trim();
                 const user = document.getElementById('auth-username').value.trim();
-                const pass = document.getElementById('auth-password').value;
+                const pass = document.getElementById('auth-password').value.trim();
                 const errBox = document.getElementById('auth-error');
                 
-                const match = db.users.find(u => u.vessel.toLowerCase() === vessel.toLowerCase() && u.username.toLowerCase() === user.toLowerCase() && u.password === pass);
+                const match = db.users.find(u => 
+                    (u.vessel || '').toLowerCase() === vessel.toLowerCase() && 
+                    (u.username || '').toLowerCase() === user.toLowerCase() && 
+                    u.password === pass
+                );
+                
                 if (match) {
+                    if (!match.role) match.role = match.isAdmin ? 'admin' : 'crew';
+                    
+                    // ROSAIRE GOD-MODE OVERRIDE UPON LOGIN
+                    if (match.username.toLowerCase() === 'rosaire' && match.role !== 'admin') {
+                        match.role = 'admin';
+                        match.isAdmin = true;
+                        await saveDB('update_settings', match);
+                    }
+
                     currentUser = match; 
                     launchDashboard();
                 } else {
-                    errBox.textContent = "Credentials rejected. Check vessel name and password.";
+                    errBox.textContent = "Credential Rejected. Check Vessel name and password.";
                     errBox.classList.remove('hidden');
                 }
             }
@@ -346,8 +404,14 @@
             }
             else if (action === 'create-race') {
                 const name = document.getElementById('ev-name').value.trim();
+                const location = document.getElementById('ev-location').value.trim();
                 const date = document.getElementById('ev-date').value;
+                const startTime = document.getElementById('ev-start-time').value;
+                const finishDate = document.getElementById('ev-finish-date').value;
+                const finishTime = document.getElementById('ev-finish-time').value;
+                const notes = document.getElementById('ev-notes').value.trim();
                 const spaces = document.getElementById('ev-spaces').value || 10;
+                
                 const isRecurring = document.getElementById('ev-recurring').checked;
                 const weeks = parseInt(document.getElementById('ev-weeks').value) || 1;
                 
@@ -365,7 +429,12 @@
                             id: 'race-' + Date.now() + '-' + i,
                             vessel: currentUser.vessel,
                             name: name + (i > 0 ? ` (Week ${i+1})` : ''),
+                            location: location,
                             startDate: dateStr, 
+                            startTime: startTime,
+                            finishDate: finishDate,
+                            finishTime: finishTime,
+                            notes: notes,
                             spaces: parseInt(spaces),
                             rsvps: {}
                         });
@@ -375,16 +444,20 @@
                     const newRace = {
                         id: 'race-' + Date.now(),
                         vessel: currentUser.vessel,
-                        name: name, 
+                        name: name,
+                        location: location,
                         startDate: date, 
+                        startTime: startTime,
+                        finishDate: finishDate,
+                        finishTime: finishTime,
+                        notes: notes,
                         spaces: parseInt(spaces),
                         rsvps: {}
                     };
                     await saveDB('add_race', newRace);
                 }
                 
-                document.getElementById('ev-name').value = '';
-                document.getElementById('ev-date').value = '';
+                ['ev-name', 'ev-location', 'ev-date', 'ev-start-time', 'ev-finish-date', 'ev-finish-time', 'ev-notes'].forEach(id => document.getElementById(id).value = '');
                 document.getElementById('ev-recurring').checked = false;
                 document.getElementById('recurring-options').classList.add('hidden');
                 alert("Event(s) successfully logged to the database.");
@@ -447,13 +520,14 @@
                 const uPass = document.getElementById('new-crew-pass').value.trim();
                 if(!uName || !uPass) return alert("Username and temporary password required.");
 
-                const exists = db.users.find(u => u.vessel.toLowerCase() === currentUser.vessel.toLowerCase() && u.username.toLowerCase() === uName.toLowerCase());
+                const exists = db.users.find(u => (u.vessel || '').toLowerCase() === currentUser.vessel.toLowerCase() && (u.username || '').toLowerCase() === uName.toLowerCase());
                 if(exists) return alert("Crew member already exists.");
 
                 const newCrew = {
                     vessel: currentUser.vessel,
                     username: uName,
                     password: uPass,
+                    role: 'crew',
                     isAdmin: false,
                     email: '', profilePic: '',
                     prefs: { email: false }
@@ -464,34 +538,36 @@
                 document.getElementById('new-crew-pass').value = '';
                 alert(`${uName} added to the roster!`);
             }
-            else if (action === 'toggle-admin') {
-                const tUser = target.getAttribute('data-user');
-                const currentStatus = target.getAttribute('data-status') === 'true';
-                
-                if (tUser === currentUser.username) {
-                    return alert("You cannot revoke your own Captain status.");
-                }
-
-                if(confirm(`Are you sure you want to change Captain status for ${tUser}?`)) {
-                    await saveDB('update_role', { username: tUser, vessel: currentUser.vessel, isAdmin: !currentStatus });
-                }
-            }
         });
 
-        // Render Functions
         function launchDashboard() {
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('dashboard-screen').style.display = 'flex';
             document.getElementById('display-vessel').textContent = currentUser.vessel;
             document.getElementById('display-username').textContent = currentUser.username;
             
-            if(currentUser.isAdmin) {
-                document.getElementById('admin-badge').classList.remove('hidden');
+            const badge = document.getElementById('role-badge');
+            badge.classList.remove('hidden', 'bg-amber-500', 'text-amber-950', 'bg-blue-500', 'text-white', 'bg-slate-500');
+            
+            // Render Role Badges Based on updated 3-Tier Authority
+            if (currentUser.role === 'admin') {
+                badge.textContent = 'Admin';
+                badge.classList.add('bg-blue-500', 'text-white');
+            } else if (currentUser.role === 'captain') {
+                badge.textContent = 'Captain';
+                badge.classList.add('bg-amber-500', 'text-amber-950');
+            } else {
+                badge.textContent = 'Crew';
+                badge.classList.add('bg-slate-500', 'text-white');
+            }
+            
+            const hasAdminPowers = currentUser.role === 'admin' || currentUser.role === 'captain';
+
+            if(hasAdminPowers) {
                 document.getElementById('admin-race-creator').classList.remove('hidden');
                 document.getElementById('admin-news-creator').classList.remove('hidden');
                 document.getElementById('admin-crew-creator').classList.remove('hidden');
             } else {
-                document.getElementById('admin-badge').classList.add('hidden');
                 document.getElementById('admin-race-creator').classList.add('hidden');
                 document.getElementById('admin-news-creator').classList.add('hidden');
                 document.getElementById('admin-crew-creator').classList.add('hidden');
@@ -516,7 +592,7 @@
             const container = document.getElementById('race-list');
             container.innerHTML = '';
             
-            let vesselRaces = db.races.filter(r => r.vessel.toLowerCase() === currentUser.vessel.toLowerCase());
+            let vesselRaces = db.races.filter(r => (r.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
             vesselRaces.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
             
             if (vesselRaces.length === 0) {
@@ -530,18 +606,25 @@
                 const rsvpCount = Object.keys(rsvps).filter(k => rsvps[k] === 'going').length;
                 const isFull = rsvpCount >= race.spaces;
 
+                let detailsHTML = '';
+                if(race.location) detailsHTML += `<span class="mr-3">📍 ${race.location}</span>`;
+                if(race.startTime) detailsHTML += `<span class="mr-3">⏰ Start: ${race.startTime}</span>`;
+                if(race.finishTime) detailsHTML += `<span class="mr-3">🏁 Finish: ${race.finishTime} ${race.finishDate ? '('+race.finishDate+')' : ''}</span>`;
+
                 const node = document.createElement('div');
-                node.className = "flex flex-col md:flex-row md:items-center justify-between p-5 bg-white border border-slate-200 rounded-2xl hover:border-indigo-300 transition shadow-sm";
+                node.className = "flex flex-col md:flex-row md:items-start justify-between p-5 bg-white border border-slate-200 rounded-2xl hover:border-indigo-300 transition shadow-sm";
                 
                 node.innerHTML = `
-                    <div class="mb-4 md:mb-0">
+                    <div class="mb-4 md:mb-0 w-full md:w-2/3">
                         <div class="flex items-center space-x-3 mb-1">
                             <h4 class="font-bold text-base text-slate-900">${race.name}</h4>
                             <span class="text-[10px] font-extrabold px-2 py-1 rounded bg-slate-100 text-slate-600 tracking-wide">${rsvpCount} / ${race.spaces} RSVP</span>
                         </div>
-                        <p class="text-xs text-indigo-600 font-bold uppercase tracking-wide">🗓️ ${new Date(race.startDate + 'T12:00:00').toLocaleDateString(undefined, {weekday: 'short', month: 'short', day: 'numeric'})}</p>
+                        <p class="text-xs text-indigo-600 font-bold uppercase tracking-wide mb-2">🗓️ ${new Date(race.startDate + 'T12:00:00').toLocaleDateString(undefined, {weekday: 'short', month: 'short', day: 'numeric'})}</p>
+                        ${detailsHTML ? `<p class="text-xs text-slate-500 font-medium mb-2">${detailsHTML}</p>` : ''}
+                        ${race.notes ? `<div class="bg-amber-50 border border-amber-100 p-2 rounded-lg text-xs text-amber-800 mt-2"><strong>Notes:</strong> ${race.notes}</div>` : ''}
                     </div>
-                    <div class="flex gap-2 w-full md:w-auto">
+                    <div class="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
                         <button data-action="rsvp" data-id="${race.id}" data-status="going" ${isFull && userStatus !== 'going' ? 'disabled' : ''} class="flex-1 md:flex-none px-6 py-2.5 text-xs font-bold rounded-xl border transition ${userStatus==='going'?'bg-emerald-500 border-emerald-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} ${isFull && userStatus !== 'going' ? 'opacity-50 cursor-not-allowed' : ''}">⚓ Going</button>
                         <button data-action="rsvp" data-id="${race.id}" data-status="declined" class="flex-1 md:flex-none px-6 py-2.5 text-xs font-bold rounded-xl border transition ${userStatus==='declined'?'bg-rose-500 border-rose-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">✕ Out</button>
                     </div>
@@ -554,18 +637,37 @@
             const container = document.getElementById('crew-list');
             container.innerHTML = '';
 
-            let vesselCrew = db.users.filter(u => u.vessel.toLowerCase() === currentUser.vessel.toLowerCase());
+            let vesselCrew = db.users.filter(u => (u.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
 
             vesselCrew.forEach(crew => {
                 const avatar = crew.profilePic || `https://ui-avatars.com/api/?name=${crew.username}&background=f1f5f9&color=64748b&bold=true`;
                 const node = document.createElement('div');
                 node.className = "flex items-center justify-between p-4 border border-slate-200 rounded-2xl bg-white shadow-sm";
                 
+                let roleHTML = '';
+                const uRole = crew.role || (crew.isAdmin ? 'admin' : 'crew'); // Legacy fallback mapped to Admin now
+                
+                if (uRole === 'admin') roleHTML = '<span class="text-[10px] font-bold text-blue-500 uppercase tracking-wider">Admin</span>';
+                else if (uRole === 'captain') roleHTML = '<span class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Captain</span>';
+                else roleHTML = '<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Crew</span>';
+
                 let adminActionHTML = '';
-                if (currentUser.isAdmin) {
-                    const btnText = crew.isAdmin ? 'Revoke Captain' : 'Make Captain';
-                    const btnClass = crew.isAdmin ? 'text-rose-600 bg-rose-50 hover:bg-rose-100' : 'text-amber-600 bg-amber-50 hover:bg-amber-100';
-                    adminActionHTML = `<button data-action="toggle-admin" data-user="${crew.username}" data-status="${crew.isAdmin}" class="text-[10px] font-bold px-3 py-1.5 rounded-lg transition ${btnClass}">${btnText}</button>`;
+                
+                // Determine if current user can edit this crew member's role
+                let canEditRole = false;
+                if (currentUser.username !== crew.username) {
+                    if (currentUser.role === 'admin') canEditRole = true;
+                    if (currentUser.role === 'captain' && uRole !== 'admin') canEditRole = true;
+                }
+
+                if (canEditRole) {
+                    adminActionHTML = `
+                        <select data-user="${crew.username}" class="role-selector text-xs font-bold border border-slate-200 rounded-lg p-1.5 outline-none focus:border-indigo-500 bg-slate-50 cursor-pointer">
+                            <option value="crew" ${uRole === 'crew' ? 'selected' : ''}>Crew</option>
+                            <option value="captain" ${uRole === 'captain' ? 'selected' : ''}>Captain</option>
+                            <option value="admin" ${uRole === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                    `;
                 }
 
                 node.innerHTML = `
@@ -573,7 +675,7 @@
                         <img src="${avatar}" class="w-10 h-10 rounded-full border border-slate-200 object-cover">
                         <div>
                             <p class="font-bold text-sm text-slate-900">${crew.username} ${crew.username === currentUser.username ? '<span class="text-indigo-500">(You)</span>' : ''}</p>
-                            ${crew.isAdmin ? '<span class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Captain</span>' : '<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Crew</span>'}
+                            ${roleHTML}
                         </div>
                     </div>
                     ${adminActionHTML}
@@ -586,10 +688,10 @@
             const container = document.getElementById('news-feed-container');
             container.innerHTML = '';
 
-            let vesselNews = db.news.filter(n => n.vessel.toLowerCase() === currentUser.vessel.toLowerCase());
+            let vesselNews = db.news.filter(n => (n.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
 
             if (vesselNews.length === 0) {
-                container.innerHTML = `<div class="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300"><p class="text-sm text-slate-400 font-medium">No updates from the Captain.</p></div>`; return;
+                container.innerHTML = `<div class="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300"><p class="text-sm text-slate-400 font-medium">No updates from Command.</p></div>`; return;
             }
 
             vesselNews.forEach(post => {
@@ -602,7 +704,7 @@
                     <div class="flex justify-between items-center mb-2">
                         <div class="flex items-center space-x-2">
                             <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">C</div>
-                            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Captain ${post.author}</span>
+                            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">${post.author}</span>
                         </div>
                         <span class="text-[10px] font-medium text-slate-400">${post.timestamp}</span>
                     </div>
