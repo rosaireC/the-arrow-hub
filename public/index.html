@@ -295,14 +295,20 @@
                     cache: 'no-store',
                     headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
                 });
-                const fetchedDb = await res.json();
+                let fetchedDb = await res.json();
 
-                if (fetchedDb && fetchedDb.users) {
-                    db = fetchedDb;
-                    if (!db.races) db.races = [];
-                    if (!db.news) db.news = [];
+                // Adaptive check for wrapped format { status: "success", data: {...} }
+                if (fetchedDb && fetchedDb.data) {
+                    fetchedDb = fetchedDb.data;
+                }
+
+                if (fetchedDb) {
+                    db.users = fetchedDb.users || [];
+                    db.races = fetchedDb.races || [];
+                    db.news = fetchedDb.news || [];
                 }
             } catch (e) { 
+                console.error("Database connection attempt failed:", e);
                 if (retries > 0) {
                     await new Promise(r => setTimeout(r, 1000));
                     return await init(retries - 1);
@@ -335,58 +341,4 @@
             if (Array.isArray(mutationData)) {
                 payloadData = mutationData.map(item => {
                     const cleanItem = { ...item };
-                    delete cleanItem._id;
-                    return cleanItem;
-                });
-            } else if (typeof mutationData === 'object' && mutationData !== null) {
-                payloadData = { ...mutationData };
-                delete payloadData._id;
-            } else {
-                payloadData = mutationData;
-            }
-
-            try {
-                const res = await fetch('/api/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mutation: mutationType, data: payloadData })
-                });
-                const response = await res.json();
-                
-                if (response.status === 'success' && response.db) {
-                    db = response.db; 
-                    if (currentUser) {
-                        const updatedMe = db.users.find(u => u && u.username === currentUser.username && u.vessel === currentUser.vessel);
-                        if (!updatedMe) {
-                            document.querySelector('[data-action="logout"]').click();
-                            return true;
-                        }
-                        currentUser = updatedMe;
-                        
-                        renderRaces();
-                        renderNews();
-                        renderCrew();
-                    }
-                    return true;
-                } else {
-                    alert("Database Error: " + (response.message || "Failed to save data."));
-                    return false;
-                }
-            } catch (e) { 
-                alert("Network Error: Could not connect to the database.");
-                return false;
-            }
-        }
-
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
-
-        document.addEventListener('change', function(e) {
-            if (e.target.id === 'ev-recurring') {
-                const opts
+                    delete cleanItem._
