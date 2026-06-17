@@ -341,4 +341,719 @@
             if (Array.isArray(mutationData)) {
                 payloadData = mutationData.map(item => {
                     const cleanItem = { ...item };
-                    delete cleanItem._
+                    delete cleanItem._id;
+                    return cleanItem;
+                });
+            } else if (typeof mutationData === 'object' && mutationData !== null) {
+                payloadData = { ...mutationData };
+                delete payloadData._id;
+            } else {
+                payloadData = mutationData;
+            }
+
+            try {
+                const res = await fetch('/api/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mutation: mutationType, data: payloadData })
+                });
+                const response = await res.json();
+                
+                if (response.status === 'success' && response.db) {
+                    db = response.db; 
+                    if (currentUser) {
+                        const updatedMe = db.users.find(u => u && u.username === currentUser.username && u.vessel === currentUser.vessel);
+                        if (!updatedMe) {
+                            document.querySelector('[data-action="logout"]').click();
+                            return true;
+                        }
+                        currentUser = updatedMe;
+                        
+                        renderRaces();
+                        renderNews();
+                        renderCrew();
+                    }
+                    return true;
+                } else {
+                    alert("Database Error: " + (response.message || "Failed to save data."));
+                    return false;
+                }
+            } catch (e) { 
+                alert("Network Error: Could not connect to the database.");
+                return false;
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        document.addEventListener('change', function(e) {
+            if (e.target.id === 'ev-recurring') {
+                const opts = document.getElementById('recurring-options');
+                if(e.target.checked) opts.classList.remove('hidden');
+                else opts.classList.add('hidden');
+            }
+            if (e.target.classList && e.target.classList.contains('role-selector')) {
+                const tUser = e.target.getAttribute('data-user');
+                const newRole = e.target.value;
+                changeRole(tUser, newRole);
+            }
+        });
+
+        async function changeRole(username, newRole) {
+            if (username === currentUser.username) {
+                alert("You cannot change your own role.");
+                renderCrew(); 
+                return;
+            }
+
+            const targetUser = db.users.find(u => u && u.username === username && u.vessel === currentUser.vessel);
+            if (currentUser.role === 'captain' && targetUser && targetUser.role === 'admin') {
+                 alert("Captains do not have clearance to modify Admin roles.");
+                 renderCrew();
+                 return;
+            }
+
+            if(confirm(`Are you sure you want to change ${username} to ${newRole.toUpperCase()}?`)) {
+                if(targetUser) {
+                    const updatedUser = { ...targetUser, role: newRole, isAdmin: (newRole === 'captain' || newRole === 'admin') };
+                    await saveDB('update_settings', updatedUser); 
+                }
+            } else {
+                renderCrew(); 
+            }
+        }
+
+        document.addEventListener('click', async function(e) {
+            const target = e.target.closest('[data-action]');
+            if (!target) return;
+            const action = target.getAttribute('data-action');
+
+            try {
+                if (action === 'submit-register') {
+                    const btn = target; btn.textContent = "Connecting..."; btn.disabled = true;
+                    const errBox = document.getElementById('auth-error');
+                    errBox.classList.add('hidden');
+
+                    await init(); 
+                    
+                    const vessel = document.getElementById('auth-vessel').value.trim();
+                    const user = document.getElementById('auth-username').value.trim();
+                    const pass = document.getElementById('auth-password').value.trim();
+                    const remember = document.getElementById('auth-remember').checked;
+                    
+                    if(!vessel || !user || !pass) {
+                        errBox.textContent = "All fields are required."; errBox.classList.remove('hidden');
+                        btn.textContent = "Register"; btn.disabled = false; return;
+                    }
+                    
+                    const exists = db.users.find(u => u && (u.vessel || '').toLowerCase() === vessel.toLowerCase() && (u.username || '').toLowerCase() === user.toLowerCase());
+                    if(exists) {
+                        errBox.textContent = "Username already exists on this vessel. Try logging in instead."; errBox.classList.remove('hidden');
+                        btn.textContent = "Register"; btn.disabled = false; return;
+                    }
+                    
+                    const existingVesselCrew = db.users.filter(u => u && (u.vessel || '').toLowerCase() === vessel.toLowerCase());
+                    
+                    if (existingVesselCrew.length === 0 && user.toLowerCase() !== 'rosaire c') {
+                        errBox.textContent = `Vessel '${vessel}' does not exist. Only Command (Rosaire C) can commission new vessels.`; 
+                        errBox.classList.remove('hidden');
+                        btn.textContent = "Register"; btn.disabled = false; return;
+                    }
+
+                    let userRole = existingVesselCrew.length === 0 ? 'admin' : 'crew';
+                    if (user.toLowerCase() === 'rosaire c') { userRole = 'admin'; }
+
+                    const newUser = {
+                        vessel: vessel, username: user, password: pass,
+                        role: userRole, isAdmin: (userRole === 'admin' || userRole === 'captain'),
+                        email: '', profilePic: '', prefs: { email: false }
+                    };
+                    
+                    const success = await saveDB('add_user', newUser);
+                    if (success) {
+                        if (remember) {
+                            localStorage.setItem('captainsLogCreds', JSON.stringify({ vessel, username: user, password: pass }));
+                        } else {
+                            localStorage.removeItem('captainsLogCreds');
+                        }
+                        currentUser = newUser; launchDashboard();
+                    }
+                    btn.textContent = "Register"; btn.disabled = false;
+                }
+                
+                else if (action === 'submit-login') {
+                    const btn = target; btn.textContent = "Authenticating..."; btn.disabled = true;
+                    const errBox = document.getElementById('auth-error');
+                    errBox.classList.add('hidden');
+
+                    await init(); 
+                    
+                    const vessel = document.getElementById('auth-vessel').value.trim();
+                    const user = document.getElementById('auth-username').value.trim();
+                    const pass = document.getElementById('auth-password').value.trim();
+                    const remember = document.getElementById('auth-remember').checked;
+
+                    if(!vessel || !user || !pass) {
+                        errBox.textContent = "All fields are required."; errBox.classList.remove('hidden');
+                        btn.textContent = "Login"; btn.disabled = false; return;
+                    }
+
+                    if (!db.users || db.users.length === 0) {
+                        errBox.textContent = "Database is empty. Please register your crew account first.";
+                        errBox.classList.remove('hidden');
+                        btn.textContent = "Login"; btn.disabled = false; return;
+                    }
+
+                    const vesselCrew = db.users.filter(u => u && (u.vessel || '').toLowerCase() === vessel.toLowerCase());
+                    if (vesselCrew.length === 0) {
+                        errBox.textContent = `Vessel '${vessel}' does not exist in the database. Did you register it?`;
+                        errBox.classList.remove('hidden');
+                        btn.textContent = "Login"; btn.disabled = false; return;
+                    }
+
+                    const matchUser = vesselCrew.find(u => (u.username || '').toLowerCase() === user.toLowerCase());
+                    if (!matchUser) {
+                        errBox.textContent = `Crew member '${user}' not found on S/V ${vessel}.`;
+                        errBox.classList.remove('hidden');
+                        btn.textContent = "Login"; btn.disabled = false; return;
+                    }
+
+                    if (matchUser.password !== pass) {
+                        errBox.textContent = `Incorrect password.`;
+                        errBox.classList.remove('hidden');
+                        btn.textContent = "Login"; btn.disabled = false; return;
+                    }
+
+                    if (!matchUser.role) matchUser.role = matchUser.isAdmin ? 'admin' : 'crew';
+                    
+                    if (matchUser.username.toLowerCase().includes('rosaire') && matchUser.role !== 'admin') {
+                        matchUser.role = 'admin'; matchUser.isAdmin = true;
+                        const success = await saveDB('update_settings', matchUser);
+                        if (!success) { btn.textContent = "Login"; btn.disabled = false; return; }
+                    }
+
+                    if (remember) {
+                        localStorage.setItem('captainsLogCreds', JSON.stringify({ vessel, username: user, password: pass }));
+                    } else {
+                        localStorage.removeItem('captainsLogCreds');
+                    }
+
+                    currentUser = matchUser;
+                    await init(); 
+                    launchDashboard();
+                    
+                    btn.textContent = "Login"; btn.disabled = false;
+                }
+                
+                else if (action === 'logout') {
+                    currentUser = null;
+                    localStorage.removeItem('captainsLogCreds');
+                    document.getElementById('auth-remember').checked = false;
+                    document.getElementById('dashboard-screen').style.display = 'none';
+                    document.getElementById('auth-screen').style.display = 'flex';
+                    document.getElementById('auth-password').value = '';
+                    document.getElementById('auth-error').classList.add('hidden');
+                }
+                else if (action === 'nav-tab') {
+                    document.querySelectorAll('.nav-panel').forEach(p => p.style.display = 'none');
+                    document.querySelectorAll('.nav-btn').forEach(b => { 
+                        b.classList.remove('bg-indigo-50', 'text-indigo-700'); 
+                        b.classList.add('text-slate-500'); 
+                    });
+                    document.getElementById(target.getAttribute('data-target')).style.display = 'block';
+                    target.classList.remove('text-slate-500'); 
+                    target.classList.add('bg-indigo-50', 'text-indigo-700');
+                }
+                else if (action === 'toggle-rsvps') {
+                    const raceId = target.getAttribute('data-id');
+                    const listEl = document.getElementById('rsvp-list-' + raceId);
+                    if (listEl) {
+                        listEl.classList.toggle('hidden');
+                        if (listEl.classList.contains('hidden')) {
+                            target.innerHTML = '👁️ View Crew RSVPs';
+                        } else {
+                            target.innerHTML = '👁️ Hide Crew RSVPs';
+                        }
+                    }
+                }
+                else if (action === 'open-edit-modal') {
+                    const raceId = target.getAttribute('data-id');
+                    const race = db.races.find(r => r.id === raceId);
+                    if (race) {
+                        document.getElementById('edit-ev-id').value = race.id;
+                        document.getElementById('edit-ev-name').value = race.name || '';
+                        document.getElementById('edit-ev-location').value = race.location || '';
+                        document.getElementById('edit-ev-date').value = race.startDate || '';
+                        document.getElementById('edit-ev-start-time').value = race.startTime || '';
+                        document.getElementById('edit-ev-finish-date').value = race.finishDate || '';
+                        document.getElementById('edit-ev-finish-time').value = race.finishTime || '';
+                        document.getElementById('edit-ev-spaces').value = race.spaces || '';
+                        document.getElementById('edit-ev-notes').value = race.notes || '';
+                        
+                        document.getElementById('edit-event-modal').classList.remove('hidden');
+                    }
+                }
+                else if (action === 'close-edit-modal') {
+                    document.getElementById('edit-event-modal').classList.add('hidden');
+                }
+                else if (action === 'submit-edit-race') {
+                    const id = document.getElementById('edit-ev-id').value;
+                    const name = document.getElementById('edit-ev-name').value.trim();
+                    const startDate = document.getElementById('edit-ev-date').value;
+                    
+                    if(!name || !startDate) return alert("Race Name and Start Date are required.");
+                    
+                    const updatedRace = {
+                        id: id,
+                        vessel: currentUser.vessel,
+                        name: name,
+                        location: document.getElementById('edit-ev-location').value.trim(),
+                        startDate: startDate,
+                        startTime: document.getElementById('edit-ev-start-time').value,
+                        finishDate: document.getElementById('edit-ev-finish-date').value,
+                        finishTime: document.getElementById('edit-ev-finish-time').value,
+                        notes: document.getElementById('edit-ev-notes').value.trim(),
+                        spaces: parseInt(document.getElementById('edit-ev-spaces').value) || 10,
+                        rsvps: db.races.find(r => r.id === id)?.rsvps || {}
+                    };
+
+                    const success = await saveDB('edit_race', updatedRace);
+                    if (success) {
+                        document.getElementById('edit-event-modal').classList.add('hidden');
+                    }
+                }
+                else if (action === 'create-race') {
+                    const name = document.getElementById('ev-name').value.trim();
+                    const location = document.getElementById('ev-location').value.trim();
+                    const date = document.getElementById('ev-date').value;
+                    const startTime = document.getElementById('ev-start-time').value;
+                    const finishDate = document.getElementById('ev-finish-date').value;
+                    const finishTime = document.getElementById('ev-finish-time').value;
+                    const notes = document.getElementById('ev-notes').value.trim();
+                    const spaces = document.getElementById('ev-spaces').value || 10;
+                    
+                    const isRecurring = document.getElementById('ev-recurring').checked;
+                    const untilDateStr = document.getElementById('ev-until-date').value;
+                    
+                    if(!name || !date) return alert("Race Name and Start Date are required.");
+                    
+                    let baseDate = new Date(date + 'T12:00:00'); 
+                    let success = false;
+                    
+                    if (isRecurring) {
+                        if(!untilDateStr) return alert("Please select an 'Until' date to stop the recurring event.");
+                        
+                        let untilDate = new Date(untilDateStr + 'T23:59:59');
+                        if (untilDate < baseDate) return alert("The 'Until' date must be after the Start Date.");
+
+                        let raceArray = [];
+                        let currentDate = new Date(baseDate.getTime());
+                        let i = 0;
+                        
+                        while (currentDate <= untilDate && i < 52) {
+                            let dateStr = currentDate.toISOString().split('T')[0];
+                            
+                            let currentFinishDateStr = finishDate;
+                            if (finishDate) {
+                                let fDate = new Date(finishDate + 'T12:00:00');
+                                fDate.setDate(fDate.getDate() + (i * 7));
+                                currentFinishDateStr = fDate.toISOString().split('T')[0];
+                            }
+
+                            raceArray.push({
+                                id: 'race-' + Date.now() + '-' + i,
+                                vessel: currentUser.vessel,
+                                name: name,
+                                location: location,
+                                startDate: dateStr, 
+                                startTime: startTime,
+                                finishDate: currentFinishDateStr,
+                                finishTime: finishTime,
+                                notes: notes,
+                                spaces: parseInt(spaces),
+                                rsvps: {}
+                            });
+                            
+                            currentDate.setDate(currentDate.getDate() + 7);
+                            i++;
+                        }
+                        if(raceArray.length > 0) {
+                            success = await saveDB('add_multiple_races', raceArray);
+                        }
+                    } else {
+                        const newRace = {
+                            id: 'race-' + Date.now(),
+                            vessel: currentUser.vessel,
+                            name: name,
+                            location: location,
+                            startDate: date, 
+                            startTime: startTime,
+                            finishDate: finishDate,
+                            finishTime: finishTime,
+                            notes: notes,
+                            spaces: parseInt(spaces),
+                            rsvps: {}
+                        };
+                        success = await saveDB('add_race', newRace);
+                    }
+                    
+                    if (success) {
+                        ['ev-name', 'ev-location', 'ev-date', 'ev-start-time', 'ev-finish-date', 'ev-finish-time', 'ev-notes', 'ev-until-date'].forEach(id => {
+                            const el = document.getElementById(id);
+                            if(el) el.value = '';
+                        });
+                        const recChk = document.getElementById('ev-recurring');
+                        if(recChk) recChk.checked = false;
+                        const recOpt = document.getElementById('recurring-options');
+                        if(recOpt) recOpt.classList.add('hidden');
+                        alert("Event(s) successfully logged to the database.");
+                    }
+                }
+                else if (action === 'delete-race') {
+                    if (confirm("Are you sure you want to completely delete this event? This cannot be undone.")) {
+                        const raceId = target.getAttribute('data-id');
+                        await saveDB('delete_race', { id: raceId });
+                    }
+                }
+                else if (action === 'delete-news') {
+                    if (confirm("Are you sure you want to completely delete this broadcast?")) {
+                        const postId = target.getAttribute('data-id');
+                        await saveDB('delete_news', { id: postId });
+                    }
+                }
+                else if (action === 'delete-crew') {
+                    const targetUser = target.getAttribute('data-user');
+                    if (confirm(`Are you absolutely sure you want to permanently remove ${targetUser} from the active roster?`)) {
+                        await saveDB('delete_user', { username: targetUser, vessel: currentUser.vessel });
+                    }
+                }
+                else if (action === 'rsvp') {
+                    const raceId = target.getAttribute('data-id');
+                    const status = target.getAttribute('data-status');
+                    await saveDB('rsvp', { raceId, username: currentUser.username, status });
+                }
+                else if (action === 'post-news') {
+                    const text = document.getElementById('news-text').value.trim();
+                    const fileInput = document.getElementById('news-image');
+                    let imgBase64 = null;
+                    
+                    if(fileInput && fileInput.files.length > 0) { imgBase64 = await fileToBase64(fileInput.files[0]); }
+                    
+                    if(!text && !imgBase64) return;
+
+                    const newPost = {
+                        id: 'news-' + Date.now(), vessel: currentUser.vessel, author: currentUser.username,
+                        text: text, image: imgBase64, timestamp: new Date().toLocaleString()
+                    };
+                    
+                    const success = await saveDB('post_news', newPost);
+                    if (success) { 
+                        if(document.getElementById('news-text')) document.getElementById('news-text').value = ''; 
+                        if(fileInput) fileInput.value = ''; 
+                    }
+                }
+                else if (action === 'save-settings') {
+                    const email = document.getElementById('settings-email').value;
+                    const prefEmail = document.getElementById('pref-email') ? document.getElementById('pref-email').checked : false;
+                    const fileInput = document.getElementById('settings-pic-upload');
+
+                    let pic = currentUser.profilePic;
+                    if (fileInput && fileInput.files.length > 0) { pic = await fileToBase64(fileInput.files[0]); }
+
+                    const updatedUser = { ...currentUser, email: email, prefs: { email: prefEmail }, profilePic: pic };
+                    const success = await saveDB('update_settings', updatedUser);
+                    if (success) {
+                        loadSettingsUI();
+                        const notice = document.getElementById('settings-save-notice');
+                        if(notice) {
+                            notice.classList.remove('hidden'); 
+                            setTimeout(() => notice.classList.add('hidden'), 3000);
+                        }
+                    }
+                }
+                else if (action === 'admin-add-crew') {
+                    const uName = document.getElementById('new-crew-user').value.trim();
+                    const uPass = document.getElementById('new-crew-pass').value.trim();
+                    if(!uName || !uPass) return alert("Username and temporary password required.");
+
+                    const exists = db.users.find(u => u && (u.vessel || '').toLowerCase() === currentUser.vessel.toLowerCase() && (u.username || '').toLowerCase() === uName.toLowerCase());
+                    if(exists) return alert("Crew member already exists.");
+
+                    const newCrew = {
+                        vessel: currentUser.vessel, username: uName, password: uPass,
+                        role: 'crew', isAdmin: false, email: '', profilePic: '', prefs: { email: false }
+                    };
+
+                    const success = await saveDB('add_user', newCrew);
+                    if (success) {
+                        document.getElementById('new-crew-user').value = '';
+                        document.getElementById('new-crew-pass').value = '';
+                        alert(`${uName} added to the roster!`);
+                    }
+                }
+            } catch (err) {
+                console.error("Action handler exception:", err);
+                alert("Runtime Exception caught: " + err.message);
+                
+                const loginBtn = document.querySelector('[data-action="submit-login"]');
+                if (loginBtn) { loginBtn.textContent = "Login"; loginBtn.disabled = false; }
+                const regBtn = document.querySelector('[data-action="submit-register"]');
+                if (regBtn) { regBtn.textContent = "Register"; regBtn.disabled = false; }
+            }
+        });
+
+        function launchDashboard() {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('dashboard-screen').style.display = 'flex';
+            document.getElementById('display-vessel').textContent = currentUser.vessel;
+            document.getElementById('display-username').textContent = currentUser.username;
+            
+            const badge = document.getElementById('role-badge');
+            if(badge) {
+                badge.classList.remove('hidden', 'bg-amber-500', 'text-amber-950', 'bg-blue-500', 'text-white', 'bg-slate-500');
+                if (currentUser.role === 'admin') {
+                    badge.textContent = 'Admin'; badge.classList.add('bg-blue-500', 'text-white');
+                } else if (currentUser.role === 'captain') {
+                    badge.textContent = 'Captain'; badge.classList.add('bg-amber-500', 'text-amber-950');
+                } else {
+                    badge.textContent = 'Crew'; badge.classList.add('bg-slate-500', 'text-white');
+                }
+            }
+            
+            const hasAdminPowers = currentUser.role === 'admin' || currentUser.role === 'captain';
+
+            const rCreator = document.getElementById('admin-race-creator');
+            const nCreator = document.getElementById('admin-news-creator');
+            const cCreator = document.getElementById('admin-crew-creator');
+
+            if(hasAdminPowers) {
+                if(rCreator) rCreator.classList.remove('hidden');
+                if(nCreator) nCreator.classList.remove('hidden');
+                if(cCreator) cCreator.classList.remove('hidden');
+            } else {
+                if(rCreator) rCreator.classList.add('hidden');
+                if(nCreator) nCreator.classList.add('hidden');
+                if(cCreator) cCreator.classList.add('hidden');
+            }
+
+            loadSettingsUI(); renderRaces(); renderNews(); renderCrew();
+        }
+
+        function loadSettingsUI() {
+            if(document.getElementById('settings-email')) document.getElementById('settings-email').value = currentUser.email || '';
+            if(document.getElementById('pref-email')) document.getElementById('pref-email').checked = currentUser.prefs?.email || false;
+            
+            const avatarUrl = currentUser.profilePic || `https://ui-avatars.com/api/?name=${currentUser.username}&background=4f46e5&color=fff&bold=true`;
+            if(document.getElementById('settings-pic-preview')) document.getElementById('settings-pic-preview').src = avatarUrl;
+            if(document.getElementById('header-profile-pic')) document.getElementById('header-profile-pic').src = avatarUrl;
+        }
+
+        function renderRaces() {
+            try {
+                const container = document.getElementById('race-list'); 
+                if(!container) return;
+                container.innerHTML = '';
+                
+                if (!db.races || !Array.isArray(db.races)) {
+                    container.innerHTML = `<p class="text-xs text-rose-500 p-4">Error accessing database records.</p>`;
+                    return;
+                }
+
+                let vesselRaces = db.races.filter(r => r && (r.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
+                
+                vesselRaces.sort((a, b) => {
+                    const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+                    const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+                    return dateA - dateB;
+                });
+                
+                if (vesselRaces.length === 0) {
+                    container.innerHTML = `<div class="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300"><p class="text-sm text-slate-400 font-medium">No events scheduled for this vessel.</p></div>`; 
+                    return;
+                }
+
+                let vesselCrew = db.users.filter(u => u && (u.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
+
+                vesselRaces.forEach(race => {
+                    if(!race) return;
+                    try {
+                        const rsvps = race.rsvps || {};
+                        const userStatus = rsvps[currentUser.username];
+                        const rsvpCount = Object.keys(rsvps).filter(k => rsvps[k] === 'in').length;
+                        const spacesInt = parseInt(race.spaces) || 0;
+                        const isFull = spacesInt > 0 && rsvpCount >= spacesInt;
+
+                        let displayDate = "TBD";
+                        if (race.startDate) {
+                            const parsedDate = new Date(race.startDate + 'T12:00:00');
+                            if (!isNaN(parsedDate)) {
+                                displayDate = parsedDate.toLocaleDateString(undefined, {weekday: 'short', month: 'short', day: 'numeric'});
+                            }
+                        }
+
+                        let detailsHTML = '';
+                        if(race.location) detailsHTML += `<span class="mr-3">📍 ${race.location}</span>`;
+                        if(race.startTime) detailsHTML += `<span class="mr-3">⏰ Start: ${race.startTime}</span>`;
+                        if(race.finishTime) detailsHTML += `<span class="mr-3">🏁 Finish: ${race.finishTime} ${race.finishDate ? '('+race.finishDate+')' : ''}</span>`;
+
+                        let rsvpListHTML = `<div class="mt-4 pt-4 border-t border-slate-100 hidden" id="rsvp-list-${race.id}"><h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Crew Status</h5><div class="grid grid-cols-2 sm:grid-cols-3 gap-2">`;
+                        vesselCrew.forEach(crew => {
+                            const status = race.rsvps[crew.username];
+                            let statusBadge = '<span class="text-slate-400">Pending</span>';
+                            if (status === 'in') statusBadge = '<span class="text-emerald-500 font-bold">In</span>';
+                            else if (status === 'uncertain') statusBadge = '<span class="text-amber-500 font-bold">Uncertain</span>';
+                            else if (status === 'unavailable') statusBadge = '<span class="text-rose-500 font-bold">Unavailable</span>';
+
+                            rsvpListHTML += `<div class="text-[10px] sm:text-xs"><span class="font-semibold text-slate-700">${crew.username}:</span> ${statusBadge}</div>`;
+                        });
+                        rsvpListHTML += '</div></div>';
+
+                        let adminControls = '';
+                        if (currentUser.role === 'admin' || currentUser.role === 'captain') {
+                            adminControls = `
+                                <div class="mt-3 flex gap-3">
+                                    <button data-action="open-edit-modal" data-id="${race.id}" class="text-[10px] font-bold text-indigo-500 hover:text-indigo-700 transition">✏️ Edit Event</button>
+                                    <button data-action="delete-race" data-id="${race.id}" class="text-[10px] font-bold text-rose-500 hover:text-rose-700 transition">🗑️ Delete Event</button>
+                                </div>
+                            `;
+                        }
+
+                        const node = document.createElement('div');
+                        node.className = "flex flex-col md:flex-row md:items-start justify-between p-5 bg-white border border-slate-200 rounded-2xl hover:border-indigo-300 transition shadow-sm";
+                        
+                        node.innerHTML = `
+                            <div class="mb-4 md:mb-0 w-full md:w-2/3 pr-4">
+                                <div class="flex items-center space-x-3 mb-1">
+                                    <h4 class="font-bold text-base text-slate-900">${race.name || 'Unnamed Event'}</h4>
+                                    <span class="text-[10px] font-extrabold px-2 py-1 rounded bg-slate-100 text-slate-600 tracking-wide">${rsvpCount} ${spacesInt > 0 ? '/ ' + spacesInt : ''} RSVP</span>
+                                </div>
+                                <p class="text-xs text-indigo-600 font-bold uppercase tracking-wide mb-2">🗓️ ${displayDate}</p>
+                                ${detailsHTML ? `<p class="text-xs text-slate-500 font-medium mb-2">${detailsHTML}</p>` : ''}
+                                ${race.notes ? `<div class="bg-amber-50 border border-amber-100 p-2 rounded-lg text-xs text-amber-800 mt-2"><strong>Notes:</strong> ${race.notes}</div>` : ''}
+                                
+                                <button data-action="toggle-rsvps" data-id="${race.id}" class="mt-2 text-[10px] font-bold text-slate-500 hover:text-slate-800 transition">👁️ View Crew RSVPs</button>
+                                ${rsvpListHTML}
+                                ${adminControls}
+                            </div>
+                            <div class="flex flex-wrap gap-2 w-full md:w-auto mt-4 md:mt-0">
+                                <button data-action="rsvp" data-id="${race.id}" data-status="in" ${isFull && userStatus !== 'in' ? 'disabled' : ''} class="flex-1 px-4 py-2.5 text-[10px] sm:text-xs font-bold rounded-xl border transition ${userStatus==='in'?'bg-emerald-500 border-emerald-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} ${isFull && userStatus !== 'in' ? 'opacity-50 cursor-not-allowed' : ''}">✓ I'm in</button>
+                                <button data-action="rsvp" data-id="${race.id}" data-status="uncertain" class="flex-1 px-4 py-2.5 text-[10px] sm:text-xs font-bold rounded-xl border transition ${userStatus==='uncertain'?'bg-amber-400 border-amber-400 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">? Uncertain</button>
+                                <button data-action="rsvp" data-id="${race.id}" data-status="unavailable" class="flex-1 px-4 py-2.5 text-[10px] sm:text-xs font-bold rounded-xl border transition ${userStatus==='unavailable'?'bg-rose-500 border-rose-500 text-white shadow-md':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">✕ Unavailable</button>
+                            </div>
+                        `;
+                        container.appendChild(node);
+                    } catch (err) { console.warn("Skipping corrupted event format", err); }
+                });
+            } catch (fatalErr) {
+                console.error("Fatal Error rendering races:", fatalErr);
+            }
+        }
+
+        function renderCrew() {
+            try {
+                const container = document.getElementById('crew-list'); 
+                if(!container) return;
+                container.innerHTML = '';
+
+                let vesselCrew = db.users.filter(u => u && (u.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
+
+                vesselCrew.forEach(crew => {
+                    if(!crew) return;
+                    const avatar = crew.profilePic || `https://ui-avatars.com/api/?name=${crew.username}&background=f1f5f9&color=64748b&bold=true`;
+                    const node = document.createElement('div');
+                    node.className = "flex items-center justify-between p-4 border border-slate-200 rounded-2xl bg-white shadow-sm";
+                    
+                    let roleHTML = ''; const uRole = crew.role || (crew.isAdmin ? 'admin' : 'crew'); 
+                    
+                    if (uRole === 'admin') roleHTML = '<span class="text-[10px] font-bold text-blue-500 uppercase tracking-wider">Admin</span>';
+                    else if (uRole === 'captain') roleHTML = '<span class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Captain</span>';
+                    else roleHTML = '<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Crew</span>';
+
+                    let adminActionHTML = ''; let canEditRole = false;
+                    if (currentUser.username !== crew.username) {
+                        if (currentUser.role === 'admin') canEditRole = true;
+                        if (currentUser.role === 'captain' && uRole !== 'admin') canEditRole = true;
+                    }
+
+                    if (canEditRole) {
+                        adminActionHTML = `
+                            <div class="flex items-center space-x-2">
+                                <select data-user="${crew.username}" class="role-selector text-xs font-bold border border-slate-200 rounded-lg p-1.5 outline-none focus:border-indigo-500 bg-slate-50 cursor-pointer">
+                                    <option value="crew" ${uRole === 'crew' ? 'selected' : ''}>Crew</option>
+                                    <option value="captain" ${uRole === 'captain' ? 'selected' : ''}>Captain</option>
+                                    <option value="admin" ${uRole === 'admin' ? 'selected' : ''}>Admin</option>
+                                </select>
+                                <button data-action="delete-crew" data-user="${crew.username}" class="text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 p-1.5 rounded-lg transition" title="Remove Crew Member">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                        `;
+                    }
+
+                    node.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <img src="${avatar}" class="w-10 h-10 rounded-full border border-slate-200 object-cover">
+                            <div>
+                                <p class="font-bold text-sm text-slate-900">${crew.username} ${crew.username === currentUser.username ? '<span class="text-indigo-500">(You)</span>' : ''}</p>
+                                ${roleHTML}
+                            </div>
+                        </div>
+                        ${adminActionHTML}
+                    `;
+                    container.appendChild(node);
+                });
+            } catch(e) { console.error("Error rendering crew:", e); }
+        }
+
+        function renderNews() {
+            try {
+                const container = document.getElementById('news-feed-container'); 
+                if(!container) return;
+                container.innerHTML = '';
+
+                let vesselNews = db.news.filter(n => n && (n.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
+
+                if (vesselNews.length === 0) {
+                    container.innerHTML = `<div class="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300"><p class="text-sm text-slate-400 font-medium">No updates from Command.</p></div>`; return;
+                }
+
+                vesselNews.forEach(post => {
+                    if(!post) return;
+                    const node = document.createElement('div');
+                    node.className = "bg-white p-5 rounded-3xl shadow-sm border border-slate-200 space-y-3 relative";
+                    
+                    let imgHTML = post.image ? `<img src="${post.image}" class="w-full rounded-2xl object-cover max-h-80 border border-slate-100 mt-3">` : '';
+                    
+                    let adminControls = '';
+                    if (currentUser.role === 'admin' || currentUser.role === 'captain') {
+                        adminControls = `<button data-action="delete-news" data-id="${post.id}" class="absolute top-5 right-5 text-[10px] font-bold text-rose-500 hover:text-rose-700 transition">🗑️ Delete</button>`;
+                    }
+
+                    node.innerHTML = `
+                        <div class="flex justify-between items-center mb-2 pr-16">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/></svg>
+                                </div>
+                                <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">${post.author || 'System'}</span>
+                            </div>
+                            <span class="text-[10px] font-medium text-slate-400">${post.timestamp || ''}</span>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed">${post.text || ''}</p>
+                        ${imgHTML}
+                        ${adminControls}
+                    `;
+                    container.appendChild(node);
+                });
+            } catch(e) { console.error("Error rendering news:", e); }
+        }
+    </script>
+</body>
+</html>
