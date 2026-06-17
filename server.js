@@ -76,6 +76,35 @@ app.post('/api/save', async (req, res) => {
             { username: data.username, vessel: data.vessel },
             { $set: data }
         );
+        
+    // --- NEW DELETION MUTATIONS ---
+
+    } else if (mutation === 'delete_news') {
+        await db.collection('news').deleteOne({ id: data.id });
+        
+    } else if (mutation === 'delete_user') {
+        // 1. Remove the user from the users collection
+        await db.collection('users').deleteOne({ username: data.username, vessel: data.vessel });
+        
+        // 2. Clean up their RSVPs from the schedule across all races
+        const unsetPath = `rsvps.${data.username}`;
+        await db.collection('races').updateMany(
+            { vessel: data.vessel },
+            { $unset: { [unsetPath]: "" } }
+        );
+
+    // --- EVENT MANAGEMENT MUTATIONS ---
+    
+    } else if (mutation === 'delete_race') {
+        await db.collection('races').deleteOne({ id: data.id });
+        
+    } else if (mutation === 'edit_race') {
+        // Exclude the _id/id field from the $set operator to avoid MongoDB errors
+        const { id, _id, ...updateData } = data; 
+        await db.collection('races').updateOne(
+            { id: data.id },
+            { $set: updateData }
+        );
     }
     
     const freshDb = await getFullDB();
