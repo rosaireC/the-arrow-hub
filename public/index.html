@@ -139,4 +139,254 @@
                         </div>
                         <div class="md:col-span-3">
                             <label class="block text-xs font-bold text-slate-500 mb-1">Event Notes</label>
-                            <input type="text" id="ev-notes" class="w-full p-3 bg-slate
+                            <input type="text" id="ev-notes" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition text-sm" placeholder="Any special instructions or gear required?">
+                        </div>
+                        
+                        <div class="md:col-span-4 bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" id="ev-recurring" class="rounded text-indigo-600 w-5 h-5 cursor-pointer accent-indigo-600">
+                                <span class="text-sm font-bold text-slate-700">Repeat this event weekly</span>
+                            </label>
+                            <div id="recurring-options" class="hidden flex items-center space-x-3">
+                                <span class="text-xs font-bold text-slate-500">Until</span>
+                                <input type="date" id="ev-until-date" class="p-2 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-500 cursor-pointer">
+                            </div>
+                            <button data-action="create-race" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold py-3 px-8 rounded-xl cursor-pointer shadow-md transition ml-auto">Log Event(s)</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 border-b border-slate-100 pb-3">Upcoming Events</h3>
+                    <div id="race-list" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <div id="panel-crew" style="display: none;" class="nav-panel space-y-6">
+                <div id="admin-crew-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 flex items-center">
+                        <span class="bg-emerald-100 text-emerald-600 p-1.5 rounded-lg mr-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/></svg>
+                        </span>
+                        Manually Enlist Crew
+                    </h3>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <input type="text" id="new-crew-user" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 text-sm" placeholder="New Username">
+                        </div>
+                        <div class="flex-1">
+                            <input type="text" id="new-crew-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 text-sm" placeholder="Temporary Password">
+                        </div>
+                        <button data-action="admin-add-crew" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold py-3 px-8 rounded-xl cursor-pointer shadow-md transition">Add to Roster</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 border-b border-slate-100 pb-3">Active Roster</h3>
+                    <div id="crew-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+
+            <div id="panel-news" style="display: none;" class="nav-panel space-y-6">
+                <div id="admin-news-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center">
+                        <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg mr-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v14m0-14l6 12h-6m0-14L6 12h6m-9 7c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1"/></svg>
+                        </span>
+                        Broadcast to Crew
+                    </h3>
+                    <textarea id="news-text" rows="3" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm transition" placeholder="What's the plan, Command?"></textarea>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <input type="file" id="news-image" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                        <button data-action="post-news" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-8 rounded-xl text-sm cursor-pointer shadow-md transition">Post Broadcast</button>
+                    </div>
+                </div>
+                <div id="news-feed-container" class="space-y-5"></div>
+            </div>
+
+            <div id="panel-settings" style="display: none;" class="nav-panel space-y-6">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-8">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 border-b border-slate-100 pb-3">Profile & Identification</h3>
+                        <div class="flex items-center space-x-6">
+                            <img id="settings-pic-preview" src="" class="w-24 h-24 rounded-full bg-slate-100 border-4 border-slate-50 object-cover shadow-sm">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-2">Upload Profile Photo</label>
+                                <input type="file" id="settings-pic-upload" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 border-b border-slate-100 pb-3">Communication Setup</h3>
+                        <div class="space-y-4 max-w-md">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Email Address</label>
+                                <input type="email" id="settings-email" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm" placeholder="crew@email.com">
+                            </div>
+                            <div class="flex items-center space-x-3 pt-2">
+                                <input type="checkbox" id="pref-email" class="rounded text-indigo-600 w-4 h-4 cursor-pointer accent-indigo-600">
+                                <label for="pref-email" class="text-xs font-semibold text-slate-600 cursor-pointer">Enable email updates and schedule summaries</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-slate-100 flex items-center">
+                        <button data-action="save-settings" class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-8 rounded-xl text-sm cursor-pointer shadow-md transition">Save Gear Settings</button>
+                        <span id="settings-save-notice" class="text-emerald-600 text-sm font-bold ml-4 hidden flex items-center"><span class="mr-1">✓</span> Saved successfully</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="edit-event-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 w-full max-w-2xl shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h3 class="text-lg font-bold text-slate-800 uppercase tracking-wider mb-5 border-b border-slate-100 pb-3 flex items-center">
+                <span class="bg-indigo-100 text-indigo-600 p-1.5 rounded-lg mr-2">✏️</span> Edit Event Details
+            </h3>
+            <input type="hidden" id="edit-ev-id">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Race/Event Name *</label>
+                    <input type="text" id="edit-ev-name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Location</label>
+                    <input type="text" id="edit-ev-location" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Start Date *</label>
+                    <input type="date" id="edit-ev-date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Start Time</label>
+                    <input type="time" id="edit-ev-start-time" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Finish Date</label>
+                    <input type="date" id="edit-ev-finish-date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Finish Time</label>
+                    <input type="time" id="edit-ev-finish-time" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Crew Capacity</label>
+                    <input type="number" id="edit-ev-spaces" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Event Notes</label>
+                    <input type="text" id="edit-ev-notes" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+                <button data-action="close-edit-modal" class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition">Cancel</button>
+                <button data-action="submit-edit-race" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-xl transition shadow-md">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let db = { users: [], races: [], news: [] };
+        let currentUser = null;
+
+        async function init(retries = 3) {
+            try {
+                const res = await fetch('/api/data?t=' + new Date().getTime(), { 
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                });
+                const fetchedDb = await res.json();
+
+                if (fetchedDb && fetchedDb.users) {
+                    db = fetchedDb;
+                    if (!db.races) db.races = [];
+                    if (!db.news) db.news = [];
+                }
+            } catch (e) { 
+                if (retries > 0) {
+                    await new Promise(r => setTimeout(r, 1000));
+                    return await init(retries - 1);
+                }
+            }
+        }
+
+        window.onload = async () => {
+            await init();
+            const savedCreds = localStorage.getItem('captainsLogCreds');
+            if (savedCreds) {
+                try {
+                    const creds = JSON.parse(savedCreds);
+                    document.getElementById('auth-vessel').value = creds.vessel || '';
+                    document.getElementById('auth-username').value = creds.username || '';
+                    document.getElementById('auth-password').value = creds.password || '';
+                    document.getElementById('auth-remember').checked = true;
+                    
+                    if (creds.vessel && creds.username && creds.password && db.users && db.users.length > 0) {
+                        const targetBtn = document.querySelector('[data-action="submit-login"]');
+                        if (targetBtn) targetBtn.click();
+                    }
+                } catch(e) { localStorage.removeItem('captainsLogCreds'); }
+            }
+        };
+
+        async function saveDB(mutationType, mutationData) {
+            let payloadData;
+            
+            if (Array.isArray(mutationData)) {
+                payloadData = mutationData.map(item => {
+                    const cleanItem = { ...item };
+                    delete cleanItem._id;
+                    return cleanItem;
+                });
+            } else if (typeof mutationData === 'object' && mutationData !== null) {
+                payloadData = { ...mutationData };
+                delete payloadData._id;
+            } else {
+                payloadData = mutationData;
+            }
+
+            try {
+                const res = await fetch('/api/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mutation: mutationType, data: payloadData })
+                });
+                const response = await res.json();
+                
+                if (response.status === 'success' && response.db) {
+                    db = response.db; 
+                    if (currentUser) {
+                        const updatedMe = db.users.find(u => u && u.username === currentUser.username && u.vessel === currentUser.vessel);
+                        if (!updatedMe) {
+                            document.querySelector('[data-action="logout"]').click();
+                            return true;
+                        }
+                        currentUser = updatedMe;
+                        
+                        renderRaces();
+                        renderNews();
+                        renderCrew();
+                    }
+                    return true;
+                } else {
+                    alert("Database Error: " + (response.message || "Failed to save data."));
+                    return false;
+                }
+            } catch (e) { 
+                alert("Network Error: Could not connect to the database.");
+                return false;
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        document.addEventListener('change', function(e) {
+            if (e.target.id === 'ev-recurring') {
+                const opts
