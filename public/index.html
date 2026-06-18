@@ -17,6 +17,7 @@
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
 
+    <!-- SPLASH SCREEN -->
     <div id="splash-screen" class="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center z-50 transition-opacity duration-700">
         <div class="text-center px-4">
             <svg class="w-28 h-28 mx-auto mb-6 text-indigo-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -28,8 +29,10 @@
         </div>
     </div>
 
+    <!-- MAIN APP CONTAINER -->
     <main class="flex-grow flex flex-col items-center w-full">
         
+        <!-- AUTH SCREEN -->
         <div id="auth-screen" style="display: none;" class="flex-grow flex items-center justify-center p-4 w-full">
             <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
                 <div class="p-8 text-center bg-slate-50 border-b border-slate-100">
@@ -70,8 +73,10 @@
             </div>
         </div>
 
+        <!-- DASHBOARD -->
         <div id="dashboard-screen" style="display: none;" class="flex-col flex-grow max-w-5xl mx-auto w-full p-4 md:p-8 space-y-6">
             
+            <!-- Header Card -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-slate-900 text-white p-6 rounded-3xl shadow-xl bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
                 <div class="flex items-center space-x-5 mb-4 sm:mb-0">
                     <img id="header-profile-pic" src="" class="w-16 h-16 rounded-full border-2 border-indigo-400 shadow-lg object-cover bg-slate-800">
@@ -91,15 +96,19 @@
                 <button data-action="logout" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 px-6 rounded-xl text-sm border border-slate-700 transition cursor-pointer shadow-inner">Disembark</button>
             </div>
 
+            <!-- Navigation Tabs -->
             <div class="flex flex-wrap gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
                 <button data-action="nav-tab" data-target="panel-races" class="nav-btn flex-1 min-w-[120px] py-2.5 text-sm font-bold rounded-xl bg-indigo-50 text-indigo-700 transition cursor-pointer">Racing Schedule</button>
+                <button id="nav-rsvp-summary" data-action="nav-tab" data-target="panel-rsvp-summary" class="hidden nav-btn flex-1 min-w-[120px] py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:bg-slate-50 transition cursor-pointer">Fleet RSVPs</button>
                 <button data-action="nav-tab" data-target="panel-crew" class="nav-btn flex-1 min-w-[120px] py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:bg-slate-50 transition cursor-pointer">Crew Roster</button>
                 <button data-action="nav-tab" data-target="panel-news" class="nav-btn flex-1 min-w-[120px] py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:bg-slate-50 transition cursor-pointer">News Feed</button>
                 <button data-action="nav-tab" data-target="panel-settings" class="nav-btn flex-1 min-w-[120px] py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:bg-slate-50 transition cursor-pointer">My Gear</button>
             </div>
 
+            <!-- PANEL: RACES -->
             <div id="panel-races" class="nav-panel space-y-6">
                 
+                <!-- Admin Add Race -->
                 <div id="admin-race-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                     <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 flex items-center">
                         <span class="bg-indigo-100 text-indigo-600 p-1.5 rounded-lg mr-2">
@@ -162,6 +171,20 @@
                 </div>
             </div>
 
+            <!-- PANEL: RSVP SUMMARY (ADMIN ONLY) -->
+            <div id="panel-rsvp-summary" style="display: none;" class="nav-panel space-y-6">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 border-b border-slate-100 pb-3 flex items-center">
+                        <span class="bg-indigo-100 text-indigo-600 p-1.5 rounded-lg mr-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </span>
+                        Fleet RSVP Master List
+                    </h3>
+                    <div id="rsvp-summary-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+
+            <!-- PANEL: CREW ROSTER -->
             <div id="panel-crew" style="display: none;" class="nav-panel space-y-6">
                 <div id="admin-crew-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                     <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 flex items-center">
@@ -187,6 +210,7 @@
                 </div>
             </div>
 
+            <!-- PANEL: NEWS FEED -->
             <div id="panel-news" style="display: none;" class="nav-panel space-y-6">
                 <div id="admin-news-creator" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-4">
                     <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center">
@@ -204,6 +228,7 @@
                 <div id="news-feed-container" class="space-y-5"></div>
             </div>
 
+            <!-- PANEL: SETTINGS -->
             <div id="panel-settings" style="display: none;" class="nav-panel space-y-6">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-8">
                     <div>
@@ -216,19 +241,6 @@
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-5 border-b border-slate-100 pb-3">Communication Setup</h3>
-                        <div class="space-y-4 max-w-md">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1">Email Address</label>
-                                <input type="email" id="settings-email" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm" placeholder="crew@email.com">
-                            </div>
-                            <div class="flex items-center space-x-3 pt-2">
-                                <input type="checkbox" id="pref-email" class="rounded text-indigo-600 w-4 h-4 cursor-pointer accent-indigo-600">
-                                <label for="pref-email" class="text-xs font-semibold text-slate-600 cursor-pointer">Enable email updates and schedule summaries</label>
-                            </div>
-                        </div>
-                    </div>
                     <div class="pt-4 border-t border-slate-100 flex items-center">
                         <button data-action="save-settings" class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-8 rounded-xl text-sm cursor-pointer shadow-md transition">Save Gear Settings</button>
                         <span id="settings-save-notice" class="text-emerald-600 text-sm font-bold ml-4 hidden flex items-center"><span class="mr-1">✓</span> Saved successfully</span>
@@ -238,6 +250,7 @@
         </div>
     </main>
 
+    <!-- EDIT EVENT MODAL -->
     <div id="edit-event-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
         <div class="bg-white rounded-3xl p-6 md:p-8 w-full max-w-2xl shadow-2xl overflow-y-auto max-h-[90vh]">
             <h3 class="text-lg font-bold text-slate-800 uppercase tracking-wider mb-5 border-b border-slate-100 pb-3 flex items-center">
@@ -297,7 +310,6 @@
                 });
                 let fetchedDb = await res.json();
 
-                // Adaptive check for wrapped format { status: "success", data: {...} }
                 if (fetchedDb && fetchedDb.data) {
                     fetchedDb = fetchedDb.data;
                 }
@@ -370,6 +382,7 @@
                         currentUser = updatedMe;
                         
                         renderRaces();
+                        renderRSVPSummary();
                         renderNews();
                         renderCrew();
                     }
@@ -473,7 +486,7 @@
                     const newUser = {
                         vessel: vessel, username: user, password: pass,
                         role: userRole, isAdmin: (userRole === 'admin' || userRole === 'captain'),
-                        email: '', profilePic: '', prefs: { email: false }
+                        profilePic: ''
                     };
                     
                     const success = await saveDB('add_user', newUser);
@@ -760,14 +773,12 @@
                     }
                 }
                 else if (action === 'save-settings') {
-                    const email = document.getElementById('settings-email').value;
-                    const prefEmail = document.getElementById('pref-email') ? document.getElementById('pref-email').checked : false;
                     const fileInput = document.getElementById('settings-pic-upload');
 
                     let pic = currentUser.profilePic;
                     if (fileInput && fileInput.files.length > 0) { pic = await fileToBase64(fileInput.files[0]); }
 
-                    const updatedUser = { ...currentUser, email: email, prefs: { email: prefEmail }, profilePic: pic };
+                    const updatedUser = { ...currentUser, profilePic: pic };
                     const success = await saveDB('update_settings', updatedUser);
                     if (success) {
                         loadSettingsUI();
@@ -776,26 +787,6 @@
                             notice.classList.remove('hidden'); 
                             setTimeout(() => notice.classList.add('hidden'), 3000);
                         }
-                    }
-                }
-                else if (action === 'admin-add-crew') {
-                    const uName = document.getElementById('new-crew-user').value.trim();
-                    const uPass = document.getElementById('new-crew-pass').value.trim();
-                    if(!uName || !uPass) return alert("Username and temporary password required.");
-
-                    const exists = db.users.find(u => u && (u.vessel || '').toLowerCase() === currentUser.vessel.toLowerCase() && (u.username || '').toLowerCase() === uName.toLowerCase());
-                    if(exists) return alert("Crew member already exists.");
-
-                    const newCrew = {
-                        vessel: currentUser.vessel, username: uName, password: uPass,
-                        role: 'crew', isAdmin: false, email: '', profilePic: '', prefs: { email: false }
-                    };
-
-                    const success = await saveDB('add_user', newCrew);
-                    if (success) {
-                        document.getElementById('new-crew-user').value = '';
-                        document.getElementById('new-crew-pass').value = '';
-                        alert(`${uName} added to the roster!`);
                     }
                 }
             } catch (err) {
@@ -832,24 +823,28 @@
             const rCreator = document.getElementById('admin-race-creator');
             const nCreator = document.getElementById('admin-news-creator');
             const cCreator = document.getElementById('admin-crew-creator');
+            const rsvpSummaryTab = document.getElementById('nav-rsvp-summary');
 
             if(hasAdminPowers) {
                 if(rCreator) rCreator.classList.remove('hidden');
                 if(nCreator) nCreator.classList.remove('hidden');
                 if(cCreator) cCreator.classList.remove('hidden');
+                if(rsvpSummaryTab) rsvpSummaryTab.classList.remove('hidden');
             } else {
                 if(rCreator) rCreator.classList.add('hidden');
                 if(nCreator) nCreator.classList.add('hidden');
                 if(cCreator) cCreator.classList.add('hidden');
+                if(rsvpSummaryTab) rsvpSummaryTab.classList.add('hidden');
             }
 
-            loadSettingsUI(); renderRaces(); renderNews(); renderCrew();
+            loadSettingsUI(); 
+            renderRaces(); 
+            renderRSVPSummary();
+            renderNews(); 
+            renderCrew();
         }
 
         function loadSettingsUI() {
-            if(document.getElementById('settings-email')) document.getElementById('settings-email').value = currentUser.email || '';
-            if(document.getElementById('pref-email')) document.getElementById('pref-email').checked = currentUser.prefs?.email || false;
-            
             const avatarUrl = currentUser.profilePic || `https://ui-avatars.com/api/?name=${currentUser.username}&background=4f46e5&color=fff&bold=true`;
             if(document.getElementById('settings-pic-preview')) document.getElementById('settings-pic-preview').src = avatarUrl;
             if(document.getElementById('header-profile-pic')) document.getElementById('header-profile-pic').src = avatarUrl;
@@ -954,6 +949,73 @@
             } catch (fatalErr) {
                 console.error("Fatal Error rendering races:", fatalErr);
             }
+        }
+
+        function renderRSVPSummary() {
+            try {
+                const container = document.getElementById('rsvp-summary-list');
+                if(!container) return;
+                container.innerHTML = '';
+
+                let vesselRaces = db.races.filter(r => r && (r.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
+                let vesselCrew = db.users.filter(u => u && (u.vessel || '').toLowerCase() === (currentUser.vessel || '').toLowerCase());
+
+                vesselRaces.sort((a, b) => {
+                    const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+                    const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+                    return dateA - dateB;
+                });
+
+                if (vesselRaces.length === 0) {
+                    container.innerHTML = `<div class="col-span-2 p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300"><p class="text-sm text-slate-400 font-medium">No events scheduled to summarize.</p></div>`;
+                    return;
+                }
+
+                vesselRaces.forEach(race => {
+                    if(!race) return;
+                    
+                    let displayDate = "TBD";
+                    if (race.startDate) {
+                        const parsedDate = new Date(race.startDate + 'T12:00:00');
+                        if (!isNaN(parsedDate)) {
+                            displayDate = parsedDate.toLocaleDateString(undefined, {weekday: 'short', month: 'short', day: 'numeric'});
+                        }
+                    }
+
+                    let tableRows = '';
+                    vesselCrew.forEach(crew => {
+                        const status = race.rsvps ? race.rsvps[crew.username] : null;
+                        let statusBadge = '<span class="px-2 py-1 bg-slate-100 text-slate-500 rounded text-[10px] font-bold uppercase tracking-wider">Pending</span>';
+                        if (status === 'in') statusBadge = '<span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold uppercase tracking-wider">In</span>';
+                        else if (status === 'uncertain') statusBadge = '<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-[10px] font-bold uppercase tracking-wider">Uncertain</span>';
+                        else if (status === 'unavailable') statusBadge = '<span class="px-2 py-1 bg-rose-100 text-rose-700 rounded text-[10px] font-bold uppercase tracking-wider">Unavailable</span>';
+
+                        tableRows += `
+                            <tr class="border-b border-slate-50 last:border-0 hover:bg-slate-50 transition">
+                                <td class="py-2 text-xs font-semibold text-slate-700">${crew.username}</td>
+                                <td class="py-2 text-right">${statusBadge}</td>
+                            </tr>
+                        `;
+                    });
+
+                    const node = document.createElement('div');
+                    node.className = "border border-slate-200 rounded-2xl overflow-hidden shadow-sm";
+                    node.innerHTML = `
+                        <div class="bg-slate-50 p-4 border-b border-slate-200 flex justify-between items-center">
+                            <h4 class="font-bold text-sm text-slate-900 truncate pr-2">${race.name || 'Unnamed Event'}</h4>
+                            <span class="text-xs text-indigo-600 font-bold whitespace-nowrap">${displayDate}</span>
+                        </div>
+                        <div class="p-4 bg-white">
+                            <table class="w-full">
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    container.appendChild(node);
+                });
+            } catch(e) { console.error("Error rendering RSVP summary:", e); }
         }
 
         function renderCrew() {
